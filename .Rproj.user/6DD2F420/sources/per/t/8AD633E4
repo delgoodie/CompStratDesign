@@ -1,0 +1,27 @@
+{
+    "id": "8AD633E4",
+    "path": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
+    "project_path": "src/rcpparma.cpp",
+    "type": "cpp",
+    "hash": "2605439678",
+    "contents": "",
+    "dirty": false,
+    "created": 1637534834768.0,
+    "source_on_save": false,
+    "relative_order": 2,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "docOutlineVisible": "0",
+        "cursorPosition": "151,4",
+        "scrollLine": "109"
+    },
+    "folds": "12|50|14|0|\n16|68|26|0|\n30|54|37|0|\n40|1|52|0|\n56|1|86|0|\n89|48|107|0|\n109|50|127|0|\n129|45|146|3|\n",
+    "lastKnownWriteTime": 1639069197,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1639069517772,
+    "read_only": false,
+    "read_only_alternatives": []
+}
