@@ -91,8 +91,7 @@ arma::vec tri(const arma::mat &matrix, char s) {
     int rows = matrix.n_rows;
     if (rows != matrix.n_cols || rows < 2) return arma::vec(1);
     
-    int size = 0;
-    for (int i=0;i<rows-1;i++) size += i + 1;
+    int size = (rows * rows - rows) / 2 + rows % 2;
     
     arma::vec vec(size);
     
@@ -111,8 +110,7 @@ arma::ivec tri(const arma::imat &matrix, char s) {
     int rows = matrix.n_rows;
     if (rows != matrix.n_cols || rows < 2) return arma::ivec(1);
     
-    int size = 0;
-    for (int i=0;i<rows-1;i++) size += i + 1;
+    int size = (rows * rows - rows) / 2 + rows % 2;
     
     arma::ivec vec(size);
     
@@ -127,27 +125,19 @@ arma::ivec tri(const arma::imat &matrix, char s) {
         return vec;
 }
 
-// arma::mat from_tri(const arma::vec& vec) {
-//     int rows = vec.n_elem;
-//     
-//     int size = 0;
-//     for (int i=0;i<rows-1;i++) size += i + 1;
-//     
-//     arma::mat vec(size);
-//     
-//     for(int i=0,c=0;i<rows-1;i++)
-//         for(int j=1+i;j<rows;j++,c++) {
-//             if (s == 'L')
-//                 vec(c) = matrix(j, i);
-//             else
-//                 vec(c) = matrix(i, j);
-//         }
-//         
-//         return vec;
-// }
+arma::mat from_tri(const arma::vec& vec, int rows) {
+    arma::mat mat(rows, rows);
+
+    for(int i=0,c=0;i<rows;i++)
+        for(int j=i+1;j<rows;j++,c++) {
+            mat(i, j) = vec(c);
+            mat(j, i) = vec(c);
+        }
+    return mat;
+}
 
 // [[Rcpp::export]]
-arma::vec bcd_method(arma::mat S, arma::imat G, double lambda, int maxiter=500, double tol=1e-4, int verbose=1) {
+arma::mat bcd_method(arma::mat S, arma::imat G, double lambda, int maxiter=500, double tol=1e-4, int verbose=1) {
     int p = S.n_rows;
     
     arma::imat D = shortest_path(G);
@@ -173,21 +163,19 @@ arma::vec bcd_method(arma::mat S, arma::imat G, double lambda, int maxiter=500, 
     arma::ivec dd_vec = tri(D, 'L');
     
     int n_sumvv = p * (p - 1) / 2;
-
     double *sumvv = new double[n_sumvv];
     
     double obj = 0;
     
-    // Rcpp::Rcout << "Starting C FUNCTION";
-    
-        
     pathwiseprox_bcd3(ss_vec.memptr(), dd_vec.memptr(), M.memptr(), &lambda, &p, sumvv, &obj, &maxiter, &tol, &verbose);
-    // Rcpp::Rcout << "Finished C FUNCTION";
     
-    arma::vec res(n_sumvv);
-    for (int i = 0; i < n_sumvv; i++) res(i) = sumvv[i];
+    arma::vec sumvv_vec(n_sumvv);
+    for (int i = 0; i < n_sumvv; i++) sumvv_vec(i) = sumvv[i];
     
     free(sumvv);
+    
+    arma::mat res = from_tri(sumvv_vec, S.n_rows);
+    for (int i=0;i<res.n_rows;i++) res(i, i) = S(i, i);
     
     return res;
 }

@@ -24,7 +24,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // bcd_method
-arma::vec bcd_method(arma::mat S, arma::imat G, double lambda, int maxiter, double tol, int verbose);
+arma::mat bcd_method(arma::mat S, arma::imat G, double lambda, int maxiter, double tol, int verbose);
 RcppExport SEXP _CompStratDesign_bcd_method(SEXP SSEXP, SEXP GSEXP, SEXP lambdaSEXP, SEXP maxiterSEXP, SEXP tolSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
