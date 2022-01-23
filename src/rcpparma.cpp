@@ -179,3 +179,24 @@ arma::mat bcd_method(arma::mat S, arma::imat G, double lambda, int maxiter=500, 
     
     return res;
 }
+
+
+// [[Rcpp::export]]
+arma::mat iter_method(arma::mat S, arma::imat G, double t, double tol, int maxiter, double lambda, int ggb_maxiter=500, double ggb_tol=1e-4, int verbose=1) {
+    arma::mat theta_old = arma::diagmat(S.i());
+    arma::mat theta = bcd_method(theta_old - t * (-theta_old.i() + S), G, lambda);
+    int i=0;
+    
+    do {
+        i++;
+        theta_old = theta;
+        arma::mat new_S = theta_old - t * (-theta_old.i() + S);
+        theta = bcd_method(new_S, G, lambda * t, ggb_maxiter, ggb_tol, verbose);
+    } while (i < maxiter && arma::norm(theta - theta_old, 2) > tol);
+    
+    if (verbose)
+        Rcpp::Rcout << "Iterative Method converged after " << i << " iterations\n";
+    return theta.i();
+}
+
+

@@ -1,5 +1,5 @@
 library(MASS)
-
+library(matlib)
 
 generate_gb_covariance <- function(g, b, sigma = 0.01, cor = TRUE) {
     p <- length(b)
@@ -41,29 +41,92 @@ x <- matrix(rnorm(n * p), n, p) %*% A
 # Sample Covariance Matrix
 S <- cov(x)
 
-# Error of Sample Covariance Matrix
-covNorm <- norm(S - Sig, 'F')
 
-# our ggb covariance matrix (call to C++ function in rcpparma.cpp)
-lambda <- .05
-Sighat <- CompStratDesign::bcd_method(S, adj_mat, lambda)
-
-# ggb package covariance matrix
-packageSighat <- as.matrix(ggb::ggb(S, g, 'local', lambda)$Sig[[1]])
-
-print('Dif of our ggb vs ggb package')
-print(norm(packageSighat - Sighat, type='F'))
-
-
-# ggb Frobenius Norm
-ggbNorm <- norm(Sighat - Sig, type='F')
-
-
-print('')
-print('')
-print('Dif of our ggb norm vs sample cov norm (higher number is better)')
-print(covNorm - ggbNorm)
 
 
 #starting S for iter
 #inverse of diagonal of S
+
+
+iter <- function(S, adj_mat, t,  tol, maxiter, lambda, ggb_maxiter=500, ggb_tol=1e-4, verbose=1) {
+    theta_old <- diag(diag(inv(S)))
+    theta <- CompStratDesign::bcd_method(theta_old - t * (-inv(theta_old) + S), adj_mat, lambda, ggb_maxiter, ggb_tol, verbose)
+    
+    i <- 0
+    
+    while (norm(theta - theta_old, 'F') > tol && i < maxiter || i < 1) {
+        i <- i + 1
+        
+        theta_old <- theta
+        
+        new_S <- theta_old - t * (-inv(theta_old) + S)
+        
+        theta <- CompStratDesign::bcd_method(new_S, adj_mat, lambda * t, ggb_maxiter, ggb_tol, verbose)
+    }
+    
+    print(paste('R Iter Method converged after ', i, ' iterations\n'))
+    
+    return(inv(theta))
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+    # Error of Sample Covariance Matrix
+covNorm <- norm(S - Sig, 'F')
+
+# our ggb covariance matrix (call to C++ function in rcpparma.cpp)
+t <- .2
+lambda <- .05
+tol <- 1e-4
+maxiter <- 500
+
+
+Sighat <- CompStratDesign::iter_method(S, adj_mat, t, tol, maxiter, lambda)
+
+print(norm(Sighat -  iter(S, adj_mat, t, tol, maxiter, lambda), type='F'))
+proxNorm <- norm(Sighat - Sig, type='F')
+
+
+# ggb package covariance matrix
+packageSighat <- as.matrix(ggb::ggb(S, g, 'local', lambda)$Sig[[1]])
+
+
+# ggb Frobenius Norm
+ggbNorm <- norm(packageSighat - Sig, type='F')
+
+
+print('')
+print('')
+print('Dif of our prox norm vs sample cov norm (higher number is better)')
+print(covNorm - proxNorm)
+
+
+print('')
+print('')
+print('Dif of ggb package norm vs sample cov norm (higher number is better)')
+print(covNorm - ggbNorm)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

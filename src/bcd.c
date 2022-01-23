@@ -60,8 +60,6 @@ void pathwiseprox_bcd3(double *rr, int *dd, int *M, double *lambda, int *p, doub
     for (i = 0; i < cp2; i++)
         rr0[i] = rr[i];
 
-    if (*verbose > 0)
-        Rprintf("lam = %g:\n", *lambda);
     // update rr and v and sumvv for this lambda:
     prox_bcd3(rr, M, *lambda, *p, elem, nelem, ngelem, v, rr0, *maxiter, *tol, *verbose);
     // Form lower triangle of a p by p matrix sum_jb V_jb:

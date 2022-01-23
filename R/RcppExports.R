@@ -9,3 +9,7 @@ bcd_method <- function(S, G, lambda, maxiter = 500L, tol = 1e-4, verbose = 1L) {
     .Call(`_CompStratDesign_bcd_method`, S, G, lambda, maxiter, tol, verbose)
 }
 
+iter_method <- function(S, G, t, tol, maxiter, lambda, ggb_maxiter = 500L, ggb_tol = 1e-4, verbose = 1L) {
+    .Call(`_CompStratDesign_iter_method`, S, G, t, tol, maxiter, lambda, ggb_maxiter, ggb_tol, verbose)
+}
+
