@@ -5,7 +5,7 @@
 
 //#include "bcd.h"
 
-extern "C" void pathwiseprox_bcd3(double *rr, int *dd, int *M, double *lambda, int *p, double *sumvv, double *obj, int *maxiter, double *tol, int *verbose);
+extern "C" void pathwiseprox_bcd3(double *rr, int *dd, int *M, double *lambda, int *p, double *sumvv, double *obj, float* penalty, int *maxiter, double *tol, int *verbose);
 // via the depends attribute we tell Rcpp to create hooks for
 // RcppArmadillo so that the build process will know what to do
 //
@@ -137,7 +137,7 @@ arma::mat from_tri(const arma::vec& vec, int rows) {
 }
 
 // [[Rcpp::export]]
-arma::mat bcd_method(arma::mat S, arma::imat G, double lambda, int maxiter=500, double tol=1e-4, int verbose=1) {
+arma::mat bcd_method(arma::mat S, arma::imat G, double lambda, float& penalty, int maxiter=500, double tol=1e-4, int verbose=1) {
     int p = S.n_rows;
     
     arma::imat D = shortest_path(G);
@@ -167,7 +167,7 @@ arma::mat bcd_method(arma::mat S, arma::imat G, double lambda, int maxiter=500, 
     
     double obj = 0;
     
-    pathwiseprox_bcd3(ss_vec.memptr(), dd_vec.memptr(), M.memptr(), &lambda, &p, sumvv, &obj, &maxiter, &tol, &verbose);
+    pathwiseprox_bcd3(ss_vec.memptr(), dd_vec.memptr(), M.memptr(), &lambda, &p, sumvv, &obj, &penalty, &maxiter, &tol, &verbose);
     
     arma::vec sumvv_vec(n_sumvv);
     for (int i = 0; i < n_sumvv; i++) sumvv_vec(i) = sumvv[i];
@@ -181,22 +181,81 @@ arma::mat bcd_method(arma::mat S, arma::imat G, double lambda, int maxiter=500, 
 }
 
 
+static double objective(arma::mat S, arma::mat theta, double lambda, double penalty) {
+    return -log(arma::det(theta)) + arma::trace(S * theta) + lambda * penalty;
+}
+
+static float g(arma::mat x, arma::mat S) {
+    return -log(arma::det(x)) + arma::trace(S * x);
+}
+
+static arma::mat G_x(arma::mat x, arma::mat x_p, float t) {
+    return (x - x_p) / t;
+}
+
+
 // [[Rcpp::export]]
-arma::mat iter_method(arma::mat S, arma::imat G, double t, double tol, int maxiter, double lambda, int ggb_maxiter=500, double ggb_tol=1e-4, int verbose=1) {
+arma::mat iter_method(arma::mat S, arma::imat G, double t, double tol, double B, int maxiter, double lambda, arma::vec& objective_vec, int ggb_maxiter=500, double ggb_tol=1e-4, int verbose=1) {
+    float orig_t = t;
+    
     arma::mat theta_old = arma::diagmat(S.i());
-    arma::mat theta = bcd_method(theta_old - t * (-theta_old.i() + S), G, lambda);
-    int i=0;
     
-    do {
-        i++;
+    float penalty;
+    
+    arma::mat theta = bcd_method(theta_old - t * (-theta_old.i() + S), G, lambda, penalty);
+    
+    double prev_obj = 1000;
+    int i;
+    for (i = 0; i < maxiter && arma::norm(theta - theta_old, "fro") > tol; ++i) {
+        
+        Rcpp::Rcout << "norm: " << arma::norm(theta - theta_old, "fro") << " > tol: " << tol << "\n";
+        
+        t = orig_t;
         theta_old = theta;
+        
+        // Shrink t
+        // store inverse of theta for repetitive use, only write in terms of old theta
         arma::mat new_S = theta_old - t * (-theta_old.i() + S);
-        theta = bcd_method(new_S, G, lambda * t, ggb_maxiter, ggb_tol, verbose);
-    } while (i < maxiter && arma::norm(theta - theta_old, 2) > tol);
+        
+        arma::mat next_theta = bcd_method(new_S, G, lambda * t, penalty, ggb_maxiter, ggb_tol, verbose);
+        
+        
+        int b_maxiter = maxiter;
+        int b_i = 0;
+        // use theta old
+        while(g(next_theta, S) > g(theta, S) - t * arma::trace((-arma::inv(theta) + S).t() * G_x(theta, next_theta, t)) + t / 2 * pow(arma::norm(G_x(theta, next_theta, t), "fro"), 2) && b_i < b_maxiter) {
+            t *= B;
+            new_S = theta_old - t * (-theta_old.i() + S);
+            next_theta = bcd_method(new_S, G, lambda * t, penalty, ggb_maxiter, ggb_tol, verbose);
+            Rcpp::Rcout << "=============================Shrinking t: " << t << "=============================\n";
+            b_i++;
+        }
+        
+        if (b_i > b_maxiter) {
+            Rcpp::Rcout << "Hit B_Maxiter";
+            
+        }
+        
+        theta = next_theta;
+        
+        objective_vec[i] = objective(S, theta, lambda, penalty);
+        
+        
+        if (i > 0 && objective_vec[i] > objective_vec[i-1]) {
+            Rcpp::Rcout << "Objective not decreasing on " << i << " iteration\n";
+        }
+    }
     
+    return theta_old - t * (-theta_old.i() + S);
+
+        
     if (verbose)
         Rcpp::Rcout << "Iterative Method converged after " << i << " iterations\n";
-    return theta.i();
+    return theta;
 }
+
+
+
+
 
 

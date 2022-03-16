@@ -24,24 +24,25 @@ BEGIN_RCPP
 END_RCPP
 }
 // bcd_method
-arma::mat bcd_method(arma::mat S, arma::imat G, double lambda, int maxiter, double tol, int verbose);
-RcppExport SEXP _CompStratDesign_bcd_method(SEXP SSEXP, SEXP GSEXP, SEXP lambdaSEXP, SEXP maxiterSEXP, SEXP tolSEXP, SEXP verboseSEXP) {
+arma::mat bcd_method(arma::mat S, arma::imat G, double lambda, float& penalty, int maxiter, double tol, int verbose);
+RcppExport SEXP _CompStratDesign_bcd_method(SEXP SSEXP, SEXP GSEXP, SEXP lambdaSEXP, SEXP penaltySEXP, SEXP maxiterSEXP, SEXP tolSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::mat >::type S(SSEXP);
     Rcpp::traits::input_parameter< arma::imat >::type G(GSEXP);
     Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< float& >::type penalty(penaltySEXP);
     Rcpp::traits::input_parameter< int >::type maxiter(maxiterSEXP);
     Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
     Rcpp::traits::input_parameter< int >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(bcd_method(S, G, lambda, maxiter, tol, verbose));
+    rcpp_result_gen = Rcpp::wrap(bcd_method(S, G, lambda, penalty, maxiter, tol, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
 // iter_method
-arma::mat iter_method(arma::mat S, arma::imat G, double t, double tol, int maxiter, double lambda, int ggb_maxiter, double ggb_tol, int verbose);
-RcppExport SEXP _CompStratDesign_iter_method(SEXP SSEXP, SEXP GSEXP, SEXP tSEXP, SEXP tolSEXP, SEXP maxiterSEXP, SEXP lambdaSEXP, SEXP ggb_maxiterSEXP, SEXP ggb_tolSEXP, SEXP verboseSEXP) {
+arma::mat iter_method(arma::mat S, arma::imat G, double t, double tol, double B, int maxiter, double lambda, arma::vec& objective_vec, int ggb_maxiter, double ggb_tol, int verbose);
+RcppExport SEXP _CompStratDesign_iter_method(SEXP SSEXP, SEXP GSEXP, SEXP tSEXP, SEXP tolSEXP, SEXP BSEXP, SEXP maxiterSEXP, SEXP lambdaSEXP, SEXP objective_vecSEXP, SEXP ggb_maxiterSEXP, SEXP ggb_tolSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -49,20 +50,22 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::imat >::type G(GSEXP);
     Rcpp::traits::input_parameter< double >::type t(tSEXP);
     Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    Rcpp::traits::input_parameter< double >::type B(BSEXP);
     Rcpp::traits::input_parameter< int >::type maxiter(maxiterSEXP);
     Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type objective_vec(objective_vecSEXP);
     Rcpp::traits::input_parameter< int >::type ggb_maxiter(ggb_maxiterSEXP);
     Rcpp::traits::input_parameter< double >::type ggb_tol(ggb_tolSEXP);
     Rcpp::traits::input_parameter< int >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(iter_method(S, G, t, tol, maxiter, lambda, ggb_maxiter, ggb_tol, verbose));
+    rcpp_result_gen = Rcpp::wrap(iter_method(S, G, t, tol, B, maxiter, lambda, objective_vec, ggb_maxiter, ggb_tol, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
     {"_CompStratDesign_EstimateCov", (DL_FUNC) &_CompStratDesign_EstimateCov, 2},
-    {"_CompStratDesign_bcd_method", (DL_FUNC) &_CompStratDesign_bcd_method, 6},
-    {"_CompStratDesign_iter_method", (DL_FUNC) &_CompStratDesign_iter_method, 9},
+    {"_CompStratDesign_bcd_method", (DL_FUNC) &_CompStratDesign_bcd_method, 7},
+    {"_CompStratDesign_iter_method", (DL_FUNC) &_CompStratDesign_iter_method, 11},
     {NULL, NULL, 0}
 };
 

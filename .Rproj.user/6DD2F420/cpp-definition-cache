@@ -1,25 +1,34 @@
 [
     {
         "file": "C:/Users/delwi/Code/CompStratDesign/src/bcd.c",
-        "file_last_write": 1641231038.0,
+        "file_last_write": 1647454684.0,
         "definitions": [
             {
-                "usr": "c:@F@pathwiseprox_bcd3#*d#*I#S1_#S0_#S1_#S0_#S0_#S1_#S0_#S1_#",
+                "usr": "c:@F@pathwiseprox_bcd3#*d#*I#S1_#S0_#S1_#S0_#S0_#*f#S1_#S0_#S1_#",
                 "kind": 6,
                 "parent_name": "",
-                "name": "pathwiseprox_bcd3(double *, int *, int *, double *, int *, double *, double *, int *, double *, int *)",
+                "name": "pathwiseprox_bcd3(double *, int *, int *, double *, int *, double *, double *, float *, int *, double *, int *)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/bcd.c",
-                "line": 20,
+                "line": 21,
                 "column": 6
             },
             {
-                "usr": "c:@F@prox_bcd3#*d#*I#d#I#**S1_#S3_#S3_#**S0_#S0_#I#d#I#",
+                "usr": "c:@F@prox_bcd3#*d#*I#d#I#**S1_#S3_#S3_#**S0_#S0_#*f#I#d#I#",
                 "kind": 6,
                 "parent_name": "",
-                "name": "prox_bcd3(double *, int *, double, int, int ***, int **, int **, double ***, double *, int, double, int)",
+                "name": "prox_bcd3(double *, int *, double, int, int ***, int **, int **, double ***, double *, float *, int, double, int)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/bcd.c",
-                "line": 76,
+                "line": 78,
                 "column": 6
+            },
+            {
+                "usr": "c:@F@compute_penalty#I#*I#***d#*S0_#",
+                "kind": 6,
+                "parent_name": "",
+                "name": "compute_penalty(int, int *, double ***, int **)",
+                "file": "C:/Users/delwi/Code/CompStratDesign/src/bcd.c",
+                "line": 198,
+                "column": 7
             },
             {
                 "usr": "c:@F@allocate_v#*I#**S0_#S2_#I#****d#",
@@ -27,7 +36,7 @@
                 "parent_name": "",
                 "name": "allocate_v(int *, int ***, int **, int, double ****)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/bcd.c",
-                "line": 185,
+                "line": 221,
                 "column": 6
             },
             {
@@ -36,7 +45,7 @@
                 "parent_name": "",
                 "name": "free_v(int *, int ***, int, double ****)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/bcd.c",
-                "line": 205,
+                "line": 241,
                 "column": 6
             },
             {
@@ -45,7 +54,7 @@
                 "parent_name": "",
                 "name": "allocate_groups(int *, int, int *, int ****, int ***, int ***)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/bcd.c",
-                "line": 224,
+                "line": 260,
                 "column": 6
             },
             {
@@ -54,7 +63,7 @@
                 "parent_name": "",
                 "name": "free_groups(int, int *, int ****, int ***, int ***)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/bcd.c",
-                "line": 341,
+                "line": 377,
                 "column": 6
             },
             {
@@ -63,7 +72,7 @@
                 "parent_name": "",
                 "name": "compute_sumvv(double ***, int, int *, int ***, int **, int **, double *)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/bcd.c",
-                "line": 372,
+                "line": 408,
                 "column": 6
             },
             {
@@ -72,7 +81,7 @@
                 "parent_name": "",
                 "name": "objective(double ***, double, int, int *, int ***, int **, int **, double *)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/bcd.c",
-                "line": 401,
+                "line": 437,
                 "column": 8
             },
             {
@@ -81,7 +90,7 @@
                 "parent_name": "",
                 "name": "print_matrix(double *, int, int)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/bcd.c",
-                "line": 431,
+                "line": 470,
                 "column": 6
             },
             {
@@ -90,7 +99,7 @@
                 "parent_name": "",
                 "name": "print_lowertri(double *, int, int)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/bcd.c",
-                "line": 445,
+                "line": 484,
                 "column": 6
             }
         ]
@@ -102,7 +111,7 @@
     },
     {
         "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
-        "file_last_write": 1642618285.0,
+        "file_last_write": 1647453793.0,
         "definitions": [
             {
                 "usr": "c:@F@interpolate#d#d#d#",
@@ -177,21 +186,48 @@
                 "column": 11
             },
             {
-                "usr": "c:@F@bcd_method#$@N@arma@S@Mat>#d#$@N@arma@S@Mat>#I#d#I#d#I#",
+                "usr": "c:@F@bcd_method#$@N@arma@S@Mat>#d#$@N@arma@S@Mat>#I#d#&f#I#d#I#",
                 "kind": 6,
                 "parent_name": "",
-                "name": "bcd_method(arma::mat, arma::imat, double, int, double, int)",
+                "name": "bcd_method(arma::mat, arma::imat, double, float &, int, double, int)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
                 "line": 140,
                 "column": 11
             },
             {
-                "usr": "c:@F@iter_method#$@N@arma@S@Mat>#d#$@N@arma@S@Mat>#I#d#d#I#d#I#d#I#",
+                "usr": "c:rcpparma.cpp@F@objective#$@N@arma@S@Mat>#d#S0_#d#d#",
                 "kind": 6,
                 "parent_name": "",
-                "name": "iter_method(arma::mat, arma::imat, double, double, int, double, int, double, int)",
+                "name": "objective(arma::mat, arma::mat, double, double)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
-                "line": 185,
+                "line": 184,
+                "column": 15
+            },
+            {
+                "usr": "c:rcpparma.cpp@F@g#$@N@arma@S@Mat>#d#S0_#",
+                "kind": 6,
+                "parent_name": "",
+                "name": "g(arma::mat, arma::mat)",
+                "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
+                "line": 188,
+                "column": 14
+            },
+            {
+                "usr": "c:rcpparma.cpp@F@G_x#$@N@arma@S@Mat>#d#S0_#f#",
+                "kind": 6,
+                "parent_name": "",
+                "name": "G_x(arma::mat, arma::mat, float)",
+                "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
+                "line": 192,
+                "column": 18
+            },
+            {
+                "usr": "c:@F@iter_method#$@N@arma@S@Mat>#d#$@N@arma@S@Mat>#I#d#d#d#I#d#&$@N@arma@S@Col>#d#I#d#I#",
+                "kind": 6,
+                "parent_name": "",
+                "name": "iter_method(arma::mat, arma::imat, double, double, double, int, double, arma::vec &, int, double, int)",
+                "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
+                "line": 198,
                 "column": 11
             }
         ]

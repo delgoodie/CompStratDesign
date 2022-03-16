@@ -14,10 +14,11 @@ void free_v(int *M, int ***elem, int p, double ****v);
 void compute_sumvv(double ***v, int p, int *M, int ***elem, int **nelem, int **ngelem, double *sumvv);
 double objective(double ***v, double lam, int p, int *M, int ***elem, int **nelem, int **ngelem, double *rr0);
 void print_matrix(double *mat, int nr, int nc);
+float compute_penalty(int p, int *M, double ***v, int **ngelem);
 void print_lowertri(double *mm, int nr, int nc);
-void prox_bcd3(double *rr, int *M, double lam, int p, int ***elem, int **nelem, int **ngelem, double ***v, double *rr0, int maxiter, double tol, int verbose);
+void prox_bcd3(double *rr, int *M, double lam, int p, int ***elem, int **nelem, int **ngelem, double ***v, double *rr0, float* penalty, int maxiter, double tol, int verbose);
 
-void pathwiseprox_bcd3(double *rr, int *dd, int *M, double *lambda, int *p, double *sumvv, double *obj, int *maxiter, double *tol, int *verbose)
+void pathwiseprox_bcd3(double *rr, int *dd, int *M, double *lambda, int *p, double *sumvv, double *obj, float* penalty, int *maxiter, double *tol, int *verbose)
 {
     /*
      Evaluate the ggb proximal operator with no psd constraint along a grid of lambda values.
@@ -61,7 +62,8 @@ void pathwiseprox_bcd3(double *rr, int *dd, int *M, double *lambda, int *p, doub
         rr0[i] = rr[i];
 
     // update rr and v and sumvv for this lambda:
-    prox_bcd3(rr, M, *lambda, *p, elem, nelem, ngelem, v, rr0, *maxiter, *tol, *verbose);
+    
+    prox_bcd3(rr, M, *lambda, *p, elem, nelem, ngelem, v, rr0, penalty, *maxiter, *tol, *verbose);
     // Form lower triangle of a p by p matrix sum_jb V_jb:
     compute_sumvv(v, *p, M, elem, nelem, ngelem, sumvv);
     *obj = objective(v, *lambda, *p, M, elem, nelem, ngelem, rr0);
@@ -73,7 +75,7 @@ void pathwiseprox_bcd3(double *rr, int *dd, int *M, double *lambda, int *p, doub
     free(rr0);
 }
 
-void prox_bcd3(double *rr, int *M, double lam, int p, int ***elem, int **nelem, int **ngelem, double ***v, double *rr0, int maxiter, double tol, int verbose)
+void prox_bcd3(double *rr, int *M, double lam, int p, int ***elem, int **nelem, int **ngelem, double ***v, double *rr0, float* penalty, int maxiter, double tol, int verbose)
 {
     /*
      Evaluate the ggb proximal operator with no psd constraint.
@@ -93,17 +95,19 @@ void prox_bcd3(double *rr, int *M, double lam, int p, int ***elem, int **nelem, 
      */
 
     int i, ii, j, b, bb;
+    int did_converge = 0;
     int l; // cycle index
+    
     double r, temp, del, maxdel;
     for (l = 0; l < maxiter; l++)
     {
-        if (verbose > 1)
+        if (0) //verbose > 1
         {
-            Rprintf(" objective is %.7g\n",
-                    objective(v, lam, p, M, elem, nelem, ngelem, rr0));
+            Rprintf("BCD objective is %.7g\n", objective(v, lam, p, M, elem, nelem, ngelem, rr0));
         }
         maxdel = 0; // largest change in any V[i] in this cycle
         // cycle over all groups
+        // check if sum of v_jb matches output matrix
         for (j = 0; j < p; j++)
         {
             if (M[j] == 0)
@@ -173,14 +177,46 @@ void prox_bcd3(double *rr, int *M, double lam, int p, int ***elem, int **nelem, 
                 // now R is R (rather than R_jb)
             }
         }
+        
+        *penalty = compute_penalty(p, M, v, ngelem);
+        
         if (maxdel < tol)
         {
             if (verbose > 0)
-                Rprintf("Converged after %d iterations.\n", l);
+                Rprintf("C BCD Converged after %d iterations.\n", l);
+            did_converge = 1;
             break;
         }
     }
+    
+    if (!did_converge) {
+        Rprintf("C BCD Did not converge \n");
+    }
+    
 }
+
+float compute_penalty(int p, int *M, double ***v, int **ngelem) {
+    float penalty = 0;
+    for (int j = 0; j < p; j++)
+    {
+        if (M[j] == 0)
+            continue;
+        for (int b = 0; b < M[j]; b++)
+        {
+            int tt = 0;
+            for (int ii = 0; ii < ngelem[j][b]; ii++) {
+                tt += v[j][b][ii] * v[j][b][ii];
+            }
+            
+            
+            penalty += 2 * sqrt(ngelem[j][b] * tt); // using w_jb = |g_jb|^1/2
+            // factor of 2 is b/c w_jb = sqrt(2 * ngelem[j][b]) and ||V_jb|| = sqrt(2*tt)
+        }
+    }
+    return penalty;
+}
+
+
 
 void allocate_v(int *M, int ***elem, int **nelem, int p, double ****v)
 {
@@ -418,8 +454,11 @@ double objective(double ***v, double lam, int p, int *M, int ***elem, int **nele
         for (b = 0; b < M[j]; b++)
         {
             tt = 0;
-            for (ii = 0; ii < ngelem[j][b]; ii++)
+            for (ii = 0; ii < ngelem[j][b]; ii++) {
                 tt += v[j][b][ii] * v[j][b][ii];
+            }
+            
+            
             obj += lam * 2 * sqrt(ngelem[j][b] * tt); // using w_jb = |g_jb|^1/2
             // factor of 2 is b/c w_jb = sqrt(2 * ngelem[j][b]) and ||V_jb|| = sqrt(2*tt)
         }

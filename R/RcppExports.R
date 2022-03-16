@@ -5,11 +5,11 @@ EstimateCov <- function(data, lambda) {
     .Call(`_CompStratDesign_EstimateCov`, data, lambda)
 }
 
-bcd_method <- function(S, G, lambda, maxiter = 500L, tol = 1e-4, verbose = 1L) {
-    .Call(`_CompStratDesign_bcd_method`, S, G, lambda, maxiter, tol, verbose)
+bcd_method <- function(S, G, lambda, penalty, maxiter = 500L, tol = 1e-4, verbose = 1L) {
+    .Call(`_CompStratDesign_bcd_method`, S, G, lambda, penalty, maxiter, tol, verbose)
 }
 
-iter_method <- function(S, G, t, tol, maxiter, lambda, ggb_maxiter = 500L, ggb_tol = 1e-4, verbose = 1L) {
-    .Call(`_CompStratDesign_iter_method`, S, G, t, tol, maxiter, lambda, ggb_maxiter, ggb_tol, verbose)
+iter_method <- function(S, G, t, tol, B, maxiter, lambda, objective_vec, ggb_maxiter = 500L, ggb_tol = 1e-4, verbose = 1L) {
+    .Call(`_CompStratDesign_iter_method`, S, G, t, tol, B, maxiter, lambda, objective_vec, ggb_maxiter, ggb_tol, verbose)
 }
 
