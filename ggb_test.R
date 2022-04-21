@@ -22,31 +22,78 @@ generate_gb_covariance <- function(g, b, sigma = 0.01, cor = TRUE) {
     return(Sig)
 }
 
-iter <- function(S, adj_mat, t,  tol, maxiter, lambda, ggb_maxiter=500, ggb_tol=1e-4, verbose=1) {
-    theta_old <- diag(diag(inv(S)))
+ggb_mm_R <- function(S, sig_til, adj_mat, t,  tol, maxiter, lambda, prox_maxiter=500, prox_tol=1e-4, verbose=1) {
+
+    # initialize variables
+    penalty <- 0 # this is a pass by reference value that the C function prox() will set
+    sig_k <- S # sigma of current iteration
+    sig_k_1 <- S #sigma of last iteration
+    first_iter <- TRUE
+    init_t <- t
+    obj <- c() # objective list
+    it <- 0 # iteration number
     
-    penalty <- .1
+    # Helper functions
+    G_t <- function(E_k_1, E_k, t) { (E_k_1 - E_k) / t }
     
+    calc_obj <- function(sig) { CompStratDesign::Majorizor_linear(sig_til, sig, S) + lambda * penalty }
     
-    theta <- CompStratDesign::bcd_method(theta_old - t * (-inv(theta_old) + S), adj_mat, lambda, penalty, ggb_maxiter, ggb_tol, verbose)
+
     
-    i <- 0
+    while((first_iter || (norm(sig_k - sig_k_1, 'F') / norm(sig_k_1, 'F') > tol)) && it < maxiter) {
+        first_iter<-FALSE
+        it <- it + 1
+        t <- init_t
     
-    while (norm(theta - theta_old, 'F') > tol && i < maxiter || i < 1) {
-        i <- i + 1
+        grad <- CompStratDesign::Majorizor_linear_grad(sig_til, sig_k, S)
         
-        theta_old <- theta
+        #print(norm(grad - t(grad), 'F'))
         
-        new_S <- theta_old - t * (-inv(theta_old) + S)
+        mm_sig_k_1 <- CompStratDesign::Majorizor_linear(sig_til, sig_k, S)
         
-        theta <- CompStratDesign::bcd_method(new_S, adj_mat, lambda * t, penalty, ggb_maxiter, ggb_tol, verbose)
         
-        print(penalty)
+        new_S <- sig_k_1 - t *grad
+        #print(norm(new_S - t(new_S), 'F'))
+        
+        sig_bar <- CompStratDesign::ggb_psd(new_S, adj_mat, t * lambda, penalty, prox_maxiter, prox_tol, verbose)
+        
+        
+        # ===== BACKTRACK Line Search =============
+        
+        while(TRUE) {
+            mm_sig_bar <- CompStratDesign::Majorizor_linear(sig_til, sig_bar, S)
+            
+            term_2 <- -t * tr(t(grad) * G_t(sig_k, sig_bar, t))
+            
+            term_3 <- t/2 * (norm(G_t(sig_k, sig_bar, t), 'F'))**2
+            
+            if (mm_sig_bar > mm_sig_k_1 + term_2 + term_3) 
+            {
+                new_S <- sig_k - t * grad
+                sig_bar = CompStratDesign::ggb_psd(new_S, adj_mat, t * lambda, penalty, prox_maxiter, prox_tol, verbose)
+                # print("=============================Shrinking t=============================")
+                # print(t)
+                t <- t * B
+                
+                # print(norm(sig_bar - t(sig_bar), 'F'))
+                
+            } else {
+                break
+            }
+        }
+        
+        # ============ set sig for next iteration ===============
+
+        sig_k_1 <- sig_k
+        sig_k <- sig_bar
+
+        
+        obj <- append(obj, calc_obj(sig_bar))    
     }
     
-    print(paste('R Iter Method converged after ', i, ' iterations\n'))
+    plot(obj)
     
-    return(inv(theta))
+    return(sig_k)
 }
 
 
@@ -75,7 +122,7 @@ adj_mat <- as.matrix(igraph::as_adjacency_matrix(g))
 
 
 # create observations
-n <- 30
+n <- 300
 # optional fixed seed for testing
 # set.seed(123)
 eig <- eigen(Sig)
@@ -83,7 +130,15 @@ A <- diag(sqrt(eig$values)) %*% t(eig$vectors)
 x <- matrix(rnorm(n * p), n, p) %*% A
 
 # Sample Covariance Matrix
-S <- cov(x)
+S <- cor(x)
+
+#s <- diag(Sig)
+#Sig <- t(t(Sig / sqrt(s)) / sqrt(s))
+
+
+#ggb_out <- ggb::ggb(Sig, g, "local", 1)
+
+#eigen(ggb_out$Sig[[1]])$values
 
 # objective <- rep(0, maxiter)
 # 
@@ -104,33 +159,43 @@ S <- cov(x)
 
 
 # iterative method
-t <- 1
-lambda <- .1
-tol <- 1e-4
-maxiter <- 16
-B <- .9
-
-
+t <- .5
+lambda <- 1e-4
+tol <- 1e-9
+maxiter <- 100
+B <- .2
+delta <- .01
 
 objective <- rep(0, maxiter)
 
-new_S <- CompStratDesign::iter_method(S, adj_mat, t, tol, B, maxiter, lambda, objective)
-
-package_ggb <- ggb::ggb(new_S, g, "local", lambda, verbose=2)
-
-print(package_ggb$obj)
+#theta_hat <- CompStratDesign::iter_method(Sig, adj_mat, t, tol, B, maxiter, lambda, objective)
 
 
-print(norm(inv(Theta_hat) - S, 'F'))
+penalty <- 0
 
-plot(log(objective))
+sig_hat_R <- ggb_mm_R(S, S, adj_mat, t, tol, maxiter, lambda)
+
+# sigma_hat <- CompStratDesign::ggb_mm(S, S, adj_mat, t, tol, B, maxiter, lambda)
+
+
+
+print(norm(sigma_hat - sig_hat_R, 'F'))
+
+# package_ggb <- ggb::ggb(new_S, g, "local", lambda, verbose=2)
+# 
+# print(package_ggb$obj)
+
+
+# print(norm(inv(Theta_hat) - S, 'F'))
+# 
+# plot(log(objective))
 
 #print(objective)
 
-err <-norm(Theta_hat -  inv(Sig), type='F')
-rel_err <- err / norm(inv(Sig), type='F')
+# err <-norm(Theta_hat -  inv(Sig), type='F')
+# rel_err <- err / norm(inv(Sig), type='F')
 
-print(rel_err)# ggb package covariance matrix
+#print(rel_err)# ggb package covariance matrix
 # packageSighat <- as.matrix(ggb::ggb(S, g, 'local', lambda)$Sig[[1]])
 
 

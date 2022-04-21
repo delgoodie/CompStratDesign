@@ -136,8 +136,57 @@ arma::mat from_tri(const arma::vec& vec, int rows) {
     return mat;
 }
 
+
+
 // [[Rcpp::export]]
-arma::mat bcd_method(arma::mat S, arma::imat G, double lambda, float& penalty, int maxiter=500, double tol=1e-4, int verbose=1) {
+float Majorizor_EM(arma::mat sig_til, arma::mat sig, arma::mat S, float tau) {
+    arma::mat W_1 = sig_til + tau * arma::mat(sig_til.n_rows, sig_til.n_cols, arma::fill::eye);
+    arma::mat W_2 = sig_til;
+    
+    arma::mat W_1_inv = W_1.i();
+    arma::mat W_2_inv = W_2.i();
+    
+    // are these parenthesis in correct order of operations?
+    arma::mat Q = W_2_inv - W_1_inv + W_1_inv * (S * W_1_inv);
+    
+    return -log(arma::det(sig))
+        + 1/tau * arma::trace(sig * (Q * sig))
+        + arma::trace(sig * Q)
+        - 2/tau * arma::trace(sig * (W_1_inv * S));
+}
+
+// [[Rcpp::export]]
+arma::mat Majorizor_EM_grad(arma::mat sig_til, arma::mat sig, arma::mat S, float tau) {
+    arma::mat W_1 = sig_til + tau * arma::mat(sig_til.n_rows, sig_til.n_cols, arma::fill::eye);
+    arma::mat W_2 = sig_til;
+    
+    arma::mat W_1_inv = W_1.i();
+    arma::mat W_2_inv = W_2.i();
+    
+    arma::mat Q = W_2_inv - W_1_inv + W_1_inv * (S * W_1_inv);
+    
+    return -1/tau * (S * W_1_inv + (S * W_1_inv).t() - sig * Q - (sig * Q).t()) + Q - sig.i();
+}
+
+
+// [[Rcpp::export]]
+float Majorizor_linear(arma::mat sig_til, arma::mat sig, arma::mat S) {
+    return arma::trace(sig_til.i() * sig) + arma::trace(S * sig.i());
+}
+
+
+// [[Rcpp::export]]
+arma::mat Majorizor_linear_grad(arma::mat sig_til, arma::mat sig, arma::mat S) {
+    arma::mat sig_inv = sig.i();
+    arma::mat out = sig_til.i() - sig_inv * (S * sig_inv);
+    
+    out = (out + out.t()) / 2;
+    
+    return out;
+}
+
+// [[Rcpp::export]]
+arma::mat prox(arma::mat S, arma::imat G, double lambda, float& penalty, int maxiter=500, double tol=1e-4, int verbose=1) {
     int p = S.n_rows;
     
     arma::imat D = shortest_path(G);
@@ -181,6 +230,68 @@ arma::mat bcd_method(arma::mat S, arma::imat G, double lambda, float& penalty, i
 }
 
 
+static inline float max(float a, float b) { return a > b ? a : b; }
+
+// [[Rcpp::export]]
+arma::mat ggb_psd(arma::mat S, arma::imat G, double lambda, float& penalty, int maxiter, double tol, float delta, int verbose = 1) {
+
+    arma::mat oldSig;
+    arma::mat R, C(S.n_rows, S.n_cols, arma::fill::zeros);
+    
+    arma::mat out;
+    
+    arma::mat B;
+    
+    for (int i = 0; i < maxiter; i++) { 
+        // update over B: solve Prox on S + C
+        R = S + C;
+
+        out = prox(R, G, lambda, penalty, maxiter, tol, verbose);
+        
+        //Rcpp::Rcout << "|out|" << arma::norm(out - out.t(), "fro") << "\n";
+        
+        B = R - out;
+        
+        float max_dif = -1e10; 
+        
+        if (oldSig.n_elem > 0)
+            for(int j=0;j<out.n_rows;j++)for(int k=0;k<out.n_cols;k++) max_dif = max(max_dif, abs(out(j,k)-oldSig(j,k)));
+        
+        
+        if (i > 1 && max_dif < tol) {
+            if (verbose > 0) Rcpp::Rcout << "ggb_psd Converged after " << i << " iterations\n";
+                break;
+        }
+        
+        oldSig = out;
+        
+        // update over C: adjust eigenvalues
+        arma::vec eigen_val;
+        arma::mat eigen_vec;
+        
+        
+        //Rcpp::Rcout << "|B|" << arma::norm(B - B.t(), "fro") << "\n";
+        
+        
+        arma::eig_sym(eigen_val, eigen_vec, B - S);
+
+        
+        
+        // am I allowed to ask for real?
+        arma::mat diag_mat(eigen_val.n_elem, eigen_val.n_elem);
+        for(int j = 0; j < eigen_val.n_elem; j++) diag_mat(j, j) = max(eigen_val(j) + delta, 0.f);
+        
+        C = eigen_vec * diag_mat * eigen_vec.t();
+        
+        // keep using same w without recomputing
+        // w <- out$w
+    }
+    
+    return S + C - B; // S + C - B
+    // obj[l] <- out$obj + (sum((S - Sig[[l]])^2) - sum((R - Sig[[l]])^2))/2
+}
+
+
 static double objective(arma::mat S, arma::mat theta, double lambda, double penalty) {
     return -log(arma::det(theta)) + arma::trace(S * theta) + lambda * penalty;
 }
@@ -193,6 +304,54 @@ static arma::mat G_x(arma::mat x, arma::mat x_p, float t) {
     return (x - x_p) / t;
 }
 
+static arma::mat G_t(arma::mat E_k_1, arma::mat E_k, float t) {
+    return (E_k_1 - E_k) / t;
+}
+
+// [[Rcpp::export]]
+arma::mat ggb_mm(arma::mat S, arma::mat sig_til, arma::imat G, double t, double tol, double B, int maxiter, double lambda, int prox_maxiter=500, double prox_tol=1e-4, int verbose=1) {
+
+    std::vector<arma::mat> sigma;
+    sigma.push_back(S);
+    
+    float penalty;
+    
+    float init_t = t;
+        
+    while(sigma.size() < 2 || arma::norm(sigma.back() - sigma[sigma.size() - 2], "fro") / arma::norm(sigma[sigma.size() - 2]) > tol) {
+        
+        
+        arma::mat sig_bar = prox(sigma.back() - t * Majorizor_linear_grad(sig_til, sigma.back(), S), G, lambda, penalty, prox_maxiter, prox_tol, verbose);
+        
+        arma::mat sig_k = sigma.back();
+        
+        t = init_t;
+        
+        while(true) {
+            float mm_sig_bar = Majorizor_linear(sig_til, sig_bar, S);
+            
+            float mm_sig_k_1 = Majorizor_linear(sig_til, sig_k, S);
+            
+            float term_2 = -t * arma::trace(Majorizor_linear_grad(sig_til, sig_k, S).t() * G_t(sig_k, sig_bar, t));
+            
+            float term_3 = t/2 * pow(arma::norm(G_t(sig_k, sig_bar, t), "fro"), 2);
+            
+            if (mm_sig_bar <= mm_sig_k_1 + term_2 + term_3) 
+            {
+                sig_bar = prox(sig_k - t * Majorizor_linear_grad(sig_til, sig_k, S), G, lambda, penalty, prox_maxiter, prox_tol, verbose);
+                Rcpp::Rcout << "=============================Shrinking t: " << t << "=============================\n";
+                t *= B;
+            } else {
+                break;
+            }
+        }
+        
+        sigma.push_back(sig_bar);
+    }
+    
+    return sigma.back();
+}
+
 
 // [[Rcpp::export]]
 arma::mat iter_method(arma::mat S, arma::imat G, double t, double tol, double B, int maxiter, double lambda, arma::vec& objective_vec, int ggb_maxiter=500, double ggb_tol=1e-4, int verbose=1) {
@@ -202,7 +361,7 @@ arma::mat iter_method(arma::mat S, arma::imat G, double t, double tol, double B,
     
     float penalty;
     
-    arma::mat theta = bcd_method(theta_old - t * (-theta_old.i() + S), G, lambda, penalty);
+    arma::mat theta = prox(theta_old - t * (-theta_old.i() + S), G, lambda, penalty);
     
     double prev_obj = 1000;
     int i;
@@ -217,7 +376,7 @@ arma::mat iter_method(arma::mat S, arma::imat G, double t, double tol, double B,
         // store inverse of theta for repetitive use, only write in terms of old theta
         arma::mat new_S = theta_old - t * (-theta_old.i() + S);
         
-        arma::mat next_theta = bcd_method(new_S, G, lambda * t, penalty, ggb_maxiter, ggb_tol, verbose);
+        arma::mat next_theta = prox(new_S, G, lambda * t, penalty, ggb_maxiter, ggb_tol, verbose);
         
         
         int b_maxiter = maxiter;
@@ -226,7 +385,7 @@ arma::mat iter_method(arma::mat S, arma::imat G, double t, double tol, double B,
         while(g(next_theta, S) > g(theta, S) - t * arma::trace((-arma::inv(theta) + S).t() * G_x(theta, next_theta, t)) + t / 2 * pow(arma::norm(G_x(theta, next_theta, t), "fro"), 2) && b_i < b_maxiter) {
             t *= B;
             new_S = theta_old - t * (-theta_old.i() + S);
-            next_theta = bcd_method(new_S, G, lambda * t, penalty, ggb_maxiter, ggb_tol, verbose);
+            next_theta = prox(new_S, G, lambda * t, penalty, ggb_maxiter, ggb_tol, verbose);
             Rcpp::Rcout << "=============================Shrinking t: " << t << "=============================\n";
             b_i++;
         }
@@ -246,7 +405,7 @@ arma::mat iter_method(arma::mat S, arma::imat G, double t, double tol, double B,
         }
     }
     
-    return theta_old - t * (-theta_old.i() + S);
+    //return theta_old - t * (-theta_old.i() + S);
 
         
     if (verbose)

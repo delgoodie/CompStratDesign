@@ -111,7 +111,7 @@
     },
     {
         "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
-        "file_last_write": 1647453793.0,
+        "file_last_write": 1650497430.0,
         "definitions": [
             {
                 "usr": "c:@F@interpolate#d#d#d#",
@@ -186,12 +186,66 @@
                 "column": 11
             },
             {
-                "usr": "c:@F@bcd_method#$@N@arma@S@Mat>#d#$@N@arma@S@Mat>#I#d#&f#I#d#I#",
+                "usr": "c:@F@Majorizor_EM#$@N@arma@S@Mat>#d#S0_#S0_#f#",
                 "kind": 6,
                 "parent_name": "",
-                "name": "bcd_method(arma::mat, arma::imat, double, float &, int, double, int)",
+                "name": "Majorizor_EM(arma::mat, arma::mat, arma::mat, float)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
-                "line": 140,
+                "line": 142,
+                "column": 7
+            },
+            {
+                "usr": "c:@F@Majorizor_EM_grad#$@N@arma@S@Mat>#d#S0_#S0_#f#",
+                "kind": 6,
+                "parent_name": "",
+                "name": "Majorizor_EM_grad(arma::mat, arma::mat, arma::mat, float)",
+                "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
+                "line": 159,
+                "column": 11
+            },
+            {
+                "usr": "c:@F@Majorizor_linear#$@N@arma@S@Mat>#d#S0_#S0_#",
+                "kind": 6,
+                "parent_name": "",
+                "name": "Majorizor_linear(arma::mat, arma::mat, arma::mat)",
+                "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
+                "line": 173,
+                "column": 7
+            },
+            {
+                "usr": "c:@F@Majorizor_linear_grad#$@N@arma@S@Mat>#d#S0_#S0_#",
+                "kind": 6,
+                "parent_name": "",
+                "name": "Majorizor_linear_grad(arma::mat, arma::mat, arma::mat)",
+                "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
+                "line": 179,
+                "column": 11
+            },
+            {
+                "usr": "c:@F@prox#$@N@arma@S@Mat>#d#$@N@arma@S@Mat>#I#d#&f#I#d#I#",
+                "kind": 6,
+                "parent_name": "",
+                "name": "prox(arma::mat, arma::imat, double, float &, int, double, int)",
+                "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
+                "line": 189,
+                "column": 11
+            },
+            {
+                "usr": "c:rcpparma.cpp@F@max#f#f#",
+                "kind": 6,
+                "parent_name": "",
+                "name": "max(float, float)",
+                "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
+                "line": 233,
+                "column": 21
+            },
+            {
+                "usr": "c:@F@ggb_psd#$@N@arma@S@Mat>#d#$@N@arma@S@Mat>#I#d#&f#I#d#f#I#",
+                "kind": 6,
+                "parent_name": "",
+                "name": "ggb_psd(arma::mat, arma::imat, double, float &, int, double, float, int)",
+                "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
+                "line": 236,
                 "column": 11
             },
             {
@@ -200,7 +254,7 @@
                 "parent_name": "",
                 "name": "objective(arma::mat, arma::mat, double, double)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
-                "line": 184,
+                "line": 295,
                 "column": 15
             },
             {
@@ -209,7 +263,7 @@
                 "parent_name": "",
                 "name": "g(arma::mat, arma::mat)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
-                "line": 188,
+                "line": 299,
                 "column": 14
             },
             {
@@ -218,8 +272,26 @@
                 "parent_name": "",
                 "name": "G_x(arma::mat, arma::mat, float)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
-                "line": 192,
+                "line": 303,
                 "column": 18
+            },
+            {
+                "usr": "c:rcpparma.cpp@F@G_t#$@N@arma@S@Mat>#d#S0_#f#",
+                "kind": 6,
+                "parent_name": "",
+                "name": "G_t(arma::mat, arma::mat, float)",
+                "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
+                "line": 307,
+                "column": 18
+            },
+            {
+                "usr": "c:@F@ggb_mm#$@N@arma@S@Mat>#d#S0_#$@N@arma@S@Mat>#I#d#d#d#I#d#I#d#I#",
+                "kind": 6,
+                "parent_name": "",
+                "name": "ggb_mm(arma::mat, arma::mat, arma::imat, double, double, double, int, double, int, double, int)",
+                "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
+                "line": 312,
+                "column": 11
             },
             {
                 "usr": "c:@F@iter_method#$@N@arma@S@Mat>#d#$@N@arma@S@Mat>#I#d#d#d#I#d#&$@N@arma@S@Col>#d#I#d#I#",
@@ -227,7 +299,7 @@
                 "parent_name": "",
                 "name": "iter_method(arma::mat, arma::imat, double, double, double, int, double, arma::vec &, int, double, int)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
-                "line": 198,
+                "line": 357,
                 "column": 11
             }
         ]

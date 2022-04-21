@@ -5,8 +5,32 @@ EstimateCov <- function(data, lambda) {
     .Call(`_CompStratDesign_EstimateCov`, data, lambda)
 }
 
-bcd_method <- function(S, G, lambda, penalty, maxiter = 500L, tol = 1e-4, verbose = 1L) {
-    .Call(`_CompStratDesign_bcd_method`, S, G, lambda, penalty, maxiter, tol, verbose)
+Majorizor_EM <- function(sig_til, sig, S, tau) {
+    .Call(`_CompStratDesign_Majorizor_EM`, sig_til, sig, S, tau)
+}
+
+Majorizor_EM_grad <- function(sig_til, sig, S, tau) {
+    .Call(`_CompStratDesign_Majorizor_EM_grad`, sig_til, sig, S, tau)
+}
+
+Majorizor_linear <- function(sig_til, sig, S) {
+    .Call(`_CompStratDesign_Majorizor_linear`, sig_til, sig, S)
+}
+
+Majorizor_linear_grad <- function(sig_til, sig, S) {
+    .Call(`_CompStratDesign_Majorizor_linear_grad`, sig_til, sig, S)
+}
+
+prox <- function(S, G, lambda, penalty, maxiter = 500L, tol = 1e-4, verbose = 1L) {
+    .Call(`_CompStratDesign_prox`, S, G, lambda, penalty, maxiter, tol, verbose)
+}
+
+ggb_psd <- function(S, G, lambda, penalty, maxiter, tol, delta, verbose = 1L) {
+    .Call(`_CompStratDesign_ggb_psd`, S, G, lambda, penalty, maxiter, tol, delta, verbose)
+}
+
+ggb_mm <- function(S, sig_til, G, t, tol, B, maxiter, lambda, prox_maxiter = 500L, prox_tol = 1e-4, verbose = 1L) {
+    .Call(`_CompStratDesign_ggb_mm`, S, sig_til, G, t, tol, B, maxiter, lambda, prox_maxiter, prox_tol, verbose)
 }
 
 iter_method <- function(S, G, t, tol, B, maxiter, lambda, objective_vec, ggb_maxiter = 500L, ggb_tol = 1e-4, verbose = 1L) {

@@ -23,9 +23,63 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// bcd_method
-arma::mat bcd_method(arma::mat S, arma::imat G, double lambda, float& penalty, int maxiter, double tol, int verbose);
-RcppExport SEXP _CompStratDesign_bcd_method(SEXP SSEXP, SEXP GSEXP, SEXP lambdaSEXP, SEXP penaltySEXP, SEXP maxiterSEXP, SEXP tolSEXP, SEXP verboseSEXP) {
+// Majorizor_EM
+float Majorizor_EM(arma::mat sig_til, arma::mat sig, arma::mat S, float tau);
+RcppExport SEXP _CompStratDesign_Majorizor_EM(SEXP sig_tilSEXP, SEXP sigSEXP, SEXP SSEXP, SEXP tauSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type sig_til(sig_tilSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type sig(sigSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type S(SSEXP);
+    Rcpp::traits::input_parameter< float >::type tau(tauSEXP);
+    rcpp_result_gen = Rcpp::wrap(Majorizor_EM(sig_til, sig, S, tau));
+    return rcpp_result_gen;
+END_RCPP
+}
+// Majorizor_EM_grad
+arma::mat Majorizor_EM_grad(arma::mat sig_til, arma::mat sig, arma::mat S, float tau);
+RcppExport SEXP _CompStratDesign_Majorizor_EM_grad(SEXP sig_tilSEXP, SEXP sigSEXP, SEXP SSEXP, SEXP tauSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type sig_til(sig_tilSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type sig(sigSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type S(SSEXP);
+    Rcpp::traits::input_parameter< float >::type tau(tauSEXP);
+    rcpp_result_gen = Rcpp::wrap(Majorizor_EM_grad(sig_til, sig, S, tau));
+    return rcpp_result_gen;
+END_RCPP
+}
+// Majorizor_linear
+float Majorizor_linear(arma::mat sig_til, arma::mat sig, arma::mat S);
+RcppExport SEXP _CompStratDesign_Majorizor_linear(SEXP sig_tilSEXP, SEXP sigSEXP, SEXP SSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type sig_til(sig_tilSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type sig(sigSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type S(SSEXP);
+    rcpp_result_gen = Rcpp::wrap(Majorizor_linear(sig_til, sig, S));
+    return rcpp_result_gen;
+END_RCPP
+}
+// Majorizor_linear_grad
+arma::mat Majorizor_linear_grad(arma::mat sig_til, arma::mat sig, arma::mat S);
+RcppExport SEXP _CompStratDesign_Majorizor_linear_grad(SEXP sig_tilSEXP, SEXP sigSEXP, SEXP SSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type sig_til(sig_tilSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type sig(sigSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type S(SSEXP);
+    rcpp_result_gen = Rcpp::wrap(Majorizor_linear_grad(sig_til, sig, S));
+    return rcpp_result_gen;
+END_RCPP
+}
+// prox
+arma::mat prox(arma::mat S, arma::imat G, double lambda, float& penalty, int maxiter, double tol, int verbose);
+RcppExport SEXP _CompStratDesign_prox(SEXP SSEXP, SEXP GSEXP, SEXP lambdaSEXP, SEXP penaltySEXP, SEXP maxiterSEXP, SEXP tolSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -36,7 +90,46 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type maxiter(maxiterSEXP);
     Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
     Rcpp::traits::input_parameter< int >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(bcd_method(S, G, lambda, penalty, maxiter, tol, verbose));
+    rcpp_result_gen = Rcpp::wrap(prox(S, G, lambda, penalty, maxiter, tol, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
+// ggb_psd
+arma::mat ggb_psd(arma::mat S, arma::imat G, double lambda, float& penalty, int maxiter, double tol, float delta, int verbose);
+RcppExport SEXP _CompStratDesign_ggb_psd(SEXP SSEXP, SEXP GSEXP, SEXP lambdaSEXP, SEXP penaltySEXP, SEXP maxiterSEXP, SEXP tolSEXP, SEXP deltaSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type S(SSEXP);
+    Rcpp::traits::input_parameter< arma::imat >::type G(GSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< float& >::type penalty(penaltySEXP);
+    Rcpp::traits::input_parameter< int >::type maxiter(maxiterSEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    Rcpp::traits::input_parameter< float >::type delta(deltaSEXP);
+    Rcpp::traits::input_parameter< int >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(ggb_psd(S, G, lambda, penalty, maxiter, tol, delta, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
+// ggb_mm
+arma::mat ggb_mm(arma::mat S, arma::mat sig_til, arma::imat G, double t, double tol, double B, int maxiter, double lambda, int prox_maxiter, double prox_tol, int verbose);
+RcppExport SEXP _CompStratDesign_ggb_mm(SEXP SSEXP, SEXP sig_tilSEXP, SEXP GSEXP, SEXP tSEXP, SEXP tolSEXP, SEXP BSEXP, SEXP maxiterSEXP, SEXP lambdaSEXP, SEXP prox_maxiterSEXP, SEXP prox_tolSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type S(SSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type sig_til(sig_tilSEXP);
+    Rcpp::traits::input_parameter< arma::imat >::type G(GSEXP);
+    Rcpp::traits::input_parameter< double >::type t(tSEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    Rcpp::traits::input_parameter< double >::type B(BSEXP);
+    Rcpp::traits::input_parameter< int >::type maxiter(maxiterSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< int >::type prox_maxiter(prox_maxiterSEXP);
+    Rcpp::traits::input_parameter< double >::type prox_tol(prox_tolSEXP);
+    Rcpp::traits::input_parameter< int >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(ggb_mm(S, sig_til, G, t, tol, B, maxiter, lambda, prox_maxiter, prox_tol, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -64,7 +157,13 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_CompStratDesign_EstimateCov", (DL_FUNC) &_CompStratDesign_EstimateCov, 2},
-    {"_CompStratDesign_bcd_method", (DL_FUNC) &_CompStratDesign_bcd_method, 7},
+    {"_CompStratDesign_Majorizor_EM", (DL_FUNC) &_CompStratDesign_Majorizor_EM, 4},
+    {"_CompStratDesign_Majorizor_EM_grad", (DL_FUNC) &_CompStratDesign_Majorizor_EM_grad, 4},
+    {"_CompStratDesign_Majorizor_linear", (DL_FUNC) &_CompStratDesign_Majorizor_linear, 3},
+    {"_CompStratDesign_Majorizor_linear_grad", (DL_FUNC) &_CompStratDesign_Majorizor_linear_grad, 3},
+    {"_CompStratDesign_prox", (DL_FUNC) &_CompStratDesign_prox, 7},
+    {"_CompStratDesign_ggb_psd", (DL_FUNC) &_CompStratDesign_ggb_psd, 8},
+    {"_CompStratDesign_ggb_mm", (DL_FUNC) &_CompStratDesign_ggb_mm, 11},
     {"_CompStratDesign_iter_method", (DL_FUNC) &_CompStratDesign_iter_method, 11},
     {NULL, NULL, 0}
 };
