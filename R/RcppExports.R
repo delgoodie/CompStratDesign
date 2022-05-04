@@ -29,11 +29,19 @@ ggb_psd <- function(S, G, lambda, penalty, maxiter, tol, delta, verbose = 1L) {
     .Call(`_CompStratDesign_ggb_psd`, S, G, lambda, penalty, maxiter, tol, delta, verbose)
 }
 
+ggb_penalty <- function(S, G, lambda, penalty, maxiter, tol, delta, verbose = 1L) {
+    .Call(`_CompStratDesign_ggb_penalty`, S, G, lambda, penalty, maxiter, tol, delta, verbose)
+}
+
 ggb_mm <- function(S, sig_til, G, t, tol, B, maxiter, lambda, prox_maxiter = 500L, prox_tol = 1e-4, verbose = 1L) {
     .Call(`_CompStratDesign_ggb_mm`, S, sig_til, G, t, tol, B, maxiter, lambda, prox_maxiter, prox_tol, verbose)
 }
 
 iter_method <- function(S, G, t, tol, B, maxiter, lambda, objective_vec, ggb_maxiter = 500L, ggb_tol = 1e-4, verbose = 1L) {
     .Call(`_CompStratDesign_iter_method`, S, G, t, tol, B, maxiter, lambda, objective_vec, ggb_maxiter, ggb_tol, verbose)
+}
+
+modify_by_ref <- function(val) {
+    invisible(.Call(`_CompStratDesign_modify_by_ref`, val))
 }
 

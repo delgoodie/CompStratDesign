@@ -193,6 +193,7 @@ void prox_bcd3(double *rr, int *M, double lam, int p, int ***elem, int **nelem, 
         Rprintf("C BCD Did not converge \n");
     }
     
+    Rprintf("Penalty in C: %f\n", *penalty);
 }
 
 float compute_penalty(int p, int *M, double ***v, int **ngelem) {
@@ -205,8 +206,12 @@ float compute_penalty(int p, int *M, double ***v, int **ngelem) {
         {
             int tt = 0;
             for (int ii = 0; ii < ngelem[j][b]; ii++) {
+                Rprintf("Adding %f^2 \n", v[j][b][ii]);
+                
                 tt += v[j][b][ii] * v[j][b][ii];
             }
+            
+            Rprintf("ngelem %f \n", ngelem[j][b]);
             
             
             penalty += 2 * sqrt(ngelem[j][b] * tt); // using w_jb = |g_jb|^1/2

@@ -112,6 +112,24 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// ggb_penalty
+float ggb_penalty(arma::mat S, arma::imat G, double lambda, float& penalty, int maxiter, double tol, float delta, int verbose);
+RcppExport SEXP _CompStratDesign_ggb_penalty(SEXP SSEXP, SEXP GSEXP, SEXP lambdaSEXP, SEXP penaltySEXP, SEXP maxiterSEXP, SEXP tolSEXP, SEXP deltaSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type S(SSEXP);
+    Rcpp::traits::input_parameter< arma::imat >::type G(GSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< float& >::type penalty(penaltySEXP);
+    Rcpp::traits::input_parameter< int >::type maxiter(maxiterSEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    Rcpp::traits::input_parameter< float >::type delta(deltaSEXP);
+    Rcpp::traits::input_parameter< int >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(ggb_penalty(S, G, lambda, penalty, maxiter, tol, delta, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
 // ggb_mm
 arma::mat ggb_mm(arma::mat S, arma::mat sig_til, arma::imat G, double t, double tol, double B, int maxiter, double lambda, int prox_maxiter, double prox_tol, int verbose);
 RcppExport SEXP _CompStratDesign_ggb_mm(SEXP SSEXP, SEXP sig_tilSEXP, SEXP GSEXP, SEXP tSEXP, SEXP tolSEXP, SEXP BSEXP, SEXP maxiterSEXP, SEXP lambdaSEXP, SEXP prox_maxiterSEXP, SEXP prox_tolSEXP, SEXP verboseSEXP) {
@@ -154,6 +172,16 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// modify_by_ref
+void modify_by_ref(float& val);
+RcppExport SEXP _CompStratDesign_modify_by_ref(SEXP valSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< float& >::type val(valSEXP);
+    modify_by_ref(val);
+    return R_NilValue;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_CompStratDesign_EstimateCov", (DL_FUNC) &_CompStratDesign_EstimateCov, 2},
@@ -163,8 +191,10 @@ static const R_CallMethodDef CallEntries[] = {
     {"_CompStratDesign_Majorizor_linear_grad", (DL_FUNC) &_CompStratDesign_Majorizor_linear_grad, 3},
     {"_CompStratDesign_prox", (DL_FUNC) &_CompStratDesign_prox, 7},
     {"_CompStratDesign_ggb_psd", (DL_FUNC) &_CompStratDesign_ggb_psd, 8},
+    {"_CompStratDesign_ggb_penalty", (DL_FUNC) &_CompStratDesign_ggb_penalty, 8},
     {"_CompStratDesign_ggb_mm", (DL_FUNC) &_CompStratDesign_ggb_mm, 11},
     {"_CompStratDesign_iter_method", (DL_FUNC) &_CompStratDesign_iter_method, 11},
+    {"_CompStratDesign_modify_by_ref", (DL_FUNC) &_CompStratDesign_modify_by_ref, 1},
     {NULL, NULL, 0}
 };
 

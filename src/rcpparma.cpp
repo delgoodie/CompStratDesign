@@ -287,9 +287,89 @@ arma::mat ggb_psd(arma::mat S, arma::imat G, double lambda, float& penalty, int 
         // w <- out$w
     }
     
+    
+    Rcpp::Rcout << "Penalty " << penalty << "\n";
+    
     return S + C - B; // S + C - B
     // obj[l] <- out$obj + (sum((S - Sig[[l]])^2) - sum((R - Sig[[l]])^2))/2
 }
+
+
+
+
+
+
+
+
+// [[Rcpp::export]]
+float ggb_penalty(arma::mat S, arma::imat G, double lambda, float& penalty, int maxiter, double tol, float delta, int verbose = 1) {
+    
+    arma::mat oldSig;
+    arma::mat R, C(S.n_rows, S.n_cols, arma::fill::zeros);
+    
+    arma::mat out;
+    
+    arma::mat B;
+    
+    for (int i = 0; i < maxiter; i++) { 
+        // update over B: solve Prox on S + C
+        R = S + C;
+        
+        out = prox(R, G, lambda, penalty, maxiter, tol, verbose);
+        
+        //Rcpp::Rcout << "|out|" << arma::norm(out - out.t(), "fro") << "\n";
+        
+        B = R - out;
+        
+        float max_dif = -1e10; 
+        
+        if (oldSig.n_elem > 0)
+            for(int j=0;j<out.n_rows;j++)for(int k=0;k<out.n_cols;k++) max_dif = max(max_dif, abs(out(j,k)-oldSig(j,k)));
+        
+        
+        if (i > 1 && max_dif < tol) {
+            if (verbose > 0) Rcpp::Rcout << "ggb_psd Converged after " << i << " iterations\n";
+            break;
+        }
+        
+        oldSig = out;
+        
+        // update over C: adjust eigenvalues
+        arma::vec eigen_val;
+        arma::mat eigen_vec;
+        
+        
+        //Rcpp::Rcout << "|B|" << arma::norm(B - B.t(), "fro") << "\n";
+        
+        
+        arma::eig_sym(eigen_val, eigen_vec, B - S);
+        
+        
+        
+        // am I allowed to ask for real?
+        arma::mat diag_mat(eigen_val.n_elem, eigen_val.n_elem);
+        for(int j = 0; j < eigen_val.n_elem; j++) diag_mat(j, j) = max(eigen_val(j) + delta, 0.f);
+        
+        C = eigen_vec * diag_mat * eigen_vec.t();
+        
+        // keep using same w without recomputing
+        // w <- out$w
+    }
+    return 0; 
+    // return penalty + pow(arma::accu(S - oldSig), 2) - sum((R - oldSig)^2))/2;
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 static double objective(arma::mat S, arma::mat theta, double lambda, double penalty) {
@@ -363,7 +443,7 @@ arma::mat iter_method(arma::mat S, arma::imat G, double t, double tol, double B,
     
     arma::mat theta = prox(theta_old - t * (-theta_old.i() + S), G, lambda, penalty);
     
-    double prev_obj = 1000;
+    //double prev_obj = 1000;
     int i;
     for (i = 0; i < maxiter && arma::norm(theta - theta_old, "fro") > tol; ++i) {
         
@@ -411,6 +491,11 @@ arma::mat iter_method(arma::mat S, arma::imat G, double t, double tol, double B,
     if (verbose)
         Rcpp::Rcout << "Iterative Method converged after " << i << " iterations\n";
     return theta;
+}
+
+// [[Rcpp::export]]
+void modify_by_ref(float& val) {
+    val += 5;
 }
 
 
