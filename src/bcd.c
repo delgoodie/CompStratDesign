@@ -16,9 +16,14 @@ double objective(double ***v, double lam, int p, int *M, int ***elem, int **nele
 void print_matrix(double *mat, int nr, int nc);
 float compute_penalty(int p, int *M, double ***v, int **ngelem);
 void print_lowertri(double *mm, int nr, int nc);
-void prox_bcd3(double *rr, int *M, double lam, int p, int ***elem, int **nelem, int **ngelem, double ***v, double *rr0, float* penalty, int maxiter, double tol, int verbose);
+void prox_bcd3(double *rr, int *M, double lam, int p, int ***elem, int **nelem, int **ngelem, double ***v, double *rr0, double* obj, double* penalty, int maxiter, double tol, int verbose, int* out_iter, int* did_converge);
 
-void pathwiseprox_bcd3(double *rr, int *dd, int *M, double *lambda, int *p, double *sumvv, double *obj, float* penalty, int *maxiter, double *tol, int *verbose)
+/*
+ * Modified version of Jacob Bien bcd.c method to only iterate over 1 value of lambda, not grid of lambdas
+ * Also returns more output data (did_coverge, number of iterations, list of objectives for all iterations)
+ */
+
+void pathwiseprox_bcd3(double *rr, int *dd, int *M, double *lambda, int *p, double *sumvv, double *obj, double* penalty, int *maxiter, double *tol, int *verbose, int* out_iter, int* did_converge)
 {
     /*
      Evaluate the ggb proximal operator with no psd constraint along a grid of lambda values.
@@ -40,7 +45,6 @@ void pathwiseprox_bcd3(double *rr, int *dd, int *M, double *lambda, int *p, doub
      */
     int i, ii, j, b;
     int cp2 = *p * (*p - 1) / 2;
-    int l;                                              // lambda index
     int ***elem;                                        // elem[j][b][i] is ith element of s_jb
     int **nelem;                                        // nelem[j][b] is |s_jb| / 2
     int **ngelem;                                       // nelem[j][b] is |g_jb| / 2
@@ -63,10 +67,10 @@ void pathwiseprox_bcd3(double *rr, int *dd, int *M, double *lambda, int *p, doub
 
     // update rr and v and sumvv for this lambda:
     
-    prox_bcd3(rr, M, *lambda, *p, elem, nelem, ngelem, v, rr0, penalty, *maxiter, *tol, *verbose);
+    prox_bcd3(rr, M, *lambda, *p, elem, nelem, ngelem, v, rr0, obj, penalty, *maxiter, *tol, *verbose, out_iter, did_converge);
     // Form lower triangle of a p by p matrix sum_jb V_jb:
     compute_sumvv(v, *p, M, elem, nelem, ngelem, sumvv);
-    *obj = objective(v, *lambda, *p, M, elem, nelem, ngelem, rr0);
+    //*obj = objective(v, *lambda, *p, M, elem, nelem, ngelem, rr0);
     // note that sumvv + (cp2 * l) points to sumvv[cp2 *l], which is first element of the lth
     // array of length l.
 
@@ -75,7 +79,7 @@ void pathwiseprox_bcd3(double *rr, int *dd, int *M, double *lambda, int *p, doub
     free(rr0);
 }
 
-void prox_bcd3(double *rr, int *M, double lam, int p, int ***elem, int **nelem, int **ngelem, double ***v, double *rr0, float* penalty, int maxiter, double tol, int verbose)
+void prox_bcd3(double *rr, int *M, double lam, int p, int ***elem, int **nelem, int **ngelem, double ***v, double *rr0, double* obj, double* penalty, int maxiter, double tol, int verbose, int* out_iter, int* did_converge)
 {
     /*
      Evaluate the ggb proximal operator with no psd constraint.
@@ -93,14 +97,16 @@ void prox_bcd3(double *rr, int *M, double lam, int p, int ***elem, int **nelem, 
      p: dimension of R
      Note on w: for now, default weights will be calculated within: w[j][b] = |g_jb|^1/2
      */
+    *did_converge = 0; // Did converge has to be int since R doesn't like bools for some reason
+    *out_iter = 0;
 
     int i, ii, j, b, bb;
-    int did_converge = 0;
     int l; // cycle index
     
     double r, temp, del, maxdel;
     for (l = 0; l < maxiter; l++)
     {
+        (*out_iter)++;
         if (0) //verbose > 1
         {
             Rprintf("BCD objective is %.7g\n", objective(v, lam, p, M, elem, nelem, ngelem, rr0));
@@ -178,13 +184,14 @@ void prox_bcd3(double *rr, int *M, double lam, int p, int ***elem, int **nelem, 
             }
         }
         
+        obj[l] = objective(v, lam, p, M, elem, nelem, ngelem, rr0); //compute_objective(p, M, v, ngelem);
         *penalty = compute_penalty(p, M, v, ngelem);
         
         if (maxdel < tol)
         {
             if (verbose > 0)
                 Rprintf("C BCD Converged after %d iterations.\n", l);
-            did_converge = 1;
+            *did_converge = 1;
             break;
         }
     }
@@ -193,7 +200,7 @@ void prox_bcd3(double *rr, int *M, double lam, int p, int ***elem, int **nelem, 
         Rprintf("C BCD Did not converge \n");
     }
     
-    Rprintf("Penalty in C: %f\n", *penalty);
+    // Rprintf("Penalty in C: %f\n", *penalty);
 }
 
 float compute_penalty(int p, int *M, double ***v, int **ngelem) {
@@ -206,12 +213,12 @@ float compute_penalty(int p, int *M, double ***v, int **ngelem) {
         {
             int tt = 0;
             for (int ii = 0; ii < ngelem[j][b]; ii++) {
-                Rprintf("Adding %f^2 \n", v[j][b][ii]);
+                // Rprintf("Adding %f^2 \n", v[j][b][ii]);
                 
                 tt += v[j][b][ii] * v[j][b][ii];
             }
             
-            Rprintf("ngelem %f \n", ngelem[j][b]);
+            // Rprintf("ngelem %f \n", ngelem[j][b]);
             
             
             penalty += 2 * sqrt(ngelem[j][b] * tt); // using w_jb = |g_jb|^1/2

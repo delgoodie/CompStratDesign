@@ -1,24 +1,24 @@
 [
     {
         "file": "C:/Users/delwi/Code/CompStratDesign/src/bcd.c",
-        "file_last_write": 1651197820.0,
+        "file_last_write": 1652396986.0,
         "definitions": [
             {
-                "usr": "c:@F@pathwiseprox_bcd3#*d#*I#S1_#S0_#S1_#S0_#S0_#*f#S1_#S0_#S1_#",
+                "usr": "c:@F@pathwiseprox_bcd3#*d#*I#S1_#S0_#S1_#S0_#S0_#S0_#S1_#S0_#S1_#S1_#S1_#",
                 "kind": 6,
                 "parent_name": "",
-                "name": "pathwiseprox_bcd3(double *, int *, int *, double *, int *, double *, double *, float *, int *, double *, int *)",
+                "name": "pathwiseprox_bcd3(double *, int *, int *, double *, int *, double *, double *, double *, int *, double *, int *, int *, int *)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/bcd.c",
-                "line": 21,
+                "line": 26,
                 "column": 6
             },
             {
-                "usr": "c:@F@prox_bcd3#*d#*I#d#I#**S1_#S3_#S3_#**S0_#S0_#*f#I#d#I#",
+                "usr": "c:@F@prox_bcd3#*d#*I#d#I#**S1_#S3_#S3_#**S0_#S0_#S0_#S0_#I#d#I#S1_#S1_#",
                 "kind": 6,
                 "parent_name": "",
-                "name": "prox_bcd3(double *, int *, double, int, int ***, int **, int **, double ***, double *, float *, int, double, int)",
+                "name": "prox_bcd3(double *, int *, double, int, int ***, int **, int **, double ***, double *, double *, double *, int, double, int, int *, int *)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/bcd.c",
-                "line": 78,
+                "line": 82,
                 "column": 6
             },
             {
@@ -27,7 +27,7 @@
                 "parent_name": "",
                 "name": "compute_penalty(int, int *, double ***, int **)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/bcd.c",
-                "line": 199,
+                "line": 206,
                 "column": 7
             },
             {
@@ -36,7 +36,7 @@
                 "parent_name": "",
                 "name": "allocate_v(int *, int ***, int **, int, double ****)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/bcd.c",
-                "line": 226,
+                "line": 233,
                 "column": 6
             },
             {
@@ -45,7 +45,7 @@
                 "parent_name": "",
                 "name": "free_v(int *, int ***, int, double ****)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/bcd.c",
-                "line": 246,
+                "line": 253,
                 "column": 6
             },
             {
@@ -54,7 +54,7 @@
                 "parent_name": "",
                 "name": "allocate_groups(int *, int, int *, int ****, int ***, int ***)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/bcd.c",
-                "line": 265,
+                "line": 272,
                 "column": 6
             },
             {
@@ -63,7 +63,7 @@
                 "parent_name": "",
                 "name": "free_groups(int, int *, int ****, int ***, int ***)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/bcd.c",
-                "line": 382,
+                "line": 389,
                 "column": 6
             },
             {
@@ -72,7 +72,7 @@
                 "parent_name": "",
                 "name": "compute_sumvv(double ***, int, int *, int ***, int **, int **, double *)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/bcd.c",
-                "line": 413,
+                "line": 420,
                 "column": 6
             },
             {
@@ -81,7 +81,7 @@
                 "parent_name": "",
                 "name": "objective(double ***, double, int, int *, int ***, int **, int **, double *)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/bcd.c",
-                "line": 442,
+                "line": 449,
                 "column": 8
             },
             {
@@ -90,7 +90,7 @@
                 "parent_name": "",
                 "name": "print_matrix(double *, int, int)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/bcd.c",
-                "line": 475,
+                "line": 482,
                 "column": 6
             },
             {
@@ -99,7 +99,7 @@
                 "parent_name": "",
                 "name": "print_lowertri(double *, int, int)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/bcd.c",
-                "line": 489,
+                "line": 496,
                 "column": 6
             }
         ]
@@ -111,42 +111,15 @@
     },
     {
         "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
-        "file_last_write": 1651200525.0,
+        "file_last_write": 1652398966.0,
         "definitions": [
-            {
-                "usr": "c:@F@interpolate#d#d#d#",
-                "kind": 6,
-                "parent_name": "",
-                "name": "interpolate(double, double, double)",
-                "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
-                "line": 13,
-                "column": 8
-            },
-            {
-                "usr": "c:@F@interpolate_matrix#$@N@arma@S@Mat>#d#S0_#d#",
-                "kind": 6,
-                "parent_name": "",
-                "name": "interpolate_matrix(arma::mat, arma::mat, double)",
-                "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
-                "line": 17,
-                "column": 11
-            },
-            {
-                "usr": "c:@F@EstimateCov#$@N@arma@S@Mat>#d#d#",
-                "kind": 6,
-                "parent_name": "",
-                "name": "EstimateCov(arma::mat, double)",
-                "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
-                "line": 31,
-                "column": 11
-            },
             {
                 "usr": "c:@F@min_dist#&1$@N@arma@S@Mat>#I#&1$@N@arma@S@Col>#I#I#",
                 "kind": 6,
                 "parent_name": "",
                 "name": "min_dist(const arma::imat &, const arma::ivec &, int)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
-                "line": 40,
+                "line": 10,
                 "column": 5
             },
             {
@@ -155,7 +128,7 @@
                 "parent_name": "",
                 "name": "shortest_path(arma::imat)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
-                "line": 56,
+                "line": 25,
                 "column": 12
             },
             {
@@ -164,7 +137,7 @@
                 "parent_name": "",
                 "name": "tri(const arma::mat &, char)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
-                "line": 90,
+                "line": 58,
                 "column": 11
             },
             {
@@ -173,7 +146,7 @@
                 "parent_name": "",
                 "name": "tri(const arma::imat &, char)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
-                "line": 109,
+                "line": 78,
                 "column": 12
             },
             {
@@ -182,52 +155,7 @@
                 "parent_name": "",
                 "name": "from_tri(const arma::vec &, int)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
-                "line": 128,
-                "column": 11
-            },
-            {
-                "usr": "c:@F@Majorizor_EM#$@N@arma@S@Mat>#d#S0_#S0_#f#",
-                "kind": 6,
-                "parent_name": "",
-                "name": "Majorizor_EM(arma::mat, arma::mat, arma::mat, float)",
-                "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
-                "line": 142,
-                "column": 7
-            },
-            {
-                "usr": "c:@F@Majorizor_EM_grad#$@N@arma@S@Mat>#d#S0_#S0_#f#",
-                "kind": 6,
-                "parent_name": "",
-                "name": "Majorizor_EM_grad(arma::mat, arma::mat, arma::mat, float)",
-                "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
-                "line": 159,
-                "column": 11
-            },
-            {
-                "usr": "c:@F@Majorizor_linear#$@N@arma@S@Mat>#d#S0_#S0_#",
-                "kind": 6,
-                "parent_name": "",
-                "name": "Majorizor_linear(arma::mat, arma::mat, arma::mat)",
-                "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
-                "line": 173,
-                "column": 7
-            },
-            {
-                "usr": "c:@F@Majorizor_linear_grad#$@N@arma@S@Mat>#d#S0_#S0_#",
-                "kind": 6,
-                "parent_name": "",
-                "name": "Majorizor_linear_grad(arma::mat, arma::mat, arma::mat)",
-                "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
-                "line": 179,
-                "column": 11
-            },
-            {
-                "usr": "c:@F@prox#$@N@arma@S@Mat>#d#$@N@arma@S@Mat>#I#d#&f#I#d#I#",
-                "kind": 6,
-                "parent_name": "",
-                "name": "prox(arma::mat, arma::imat, double, float &, int, double, int)",
-                "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
-                "line": 189,
+                "line": 98,
                 "column": 11
             },
             {
@@ -236,89 +164,134 @@
                 "parent_name": "",
                 "name": "max(float, float)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
-                "line": 233,
+                "line": 109,
                 "column": 21
             },
             {
-                "usr": "c:@F@ggb_psd#$@N@arma@S@Mat>#d#$@N@arma@S@Mat>#I#d#&f#I#d#f#I#",
+                "usr": "c:@F@Majorizor_EM#$@N@arma@S@Mat>#d#S0_#S0_#f#",
                 "kind": 6,
                 "parent_name": "",
-                "name": "ggb_psd(arma::mat, arma::imat, double, float &, int, double, float, int)",
+                "name": "Majorizor_EM(arma::mat, arma::mat, arma::mat, float)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
-                "line": 236,
-                "column": 11
-            },
-            {
-                "usr": "c:@F@ggb_penalty#$@N@arma@S@Mat>#d#$@N@arma@S@Mat>#I#d#&f#I#d#f#I#",
-                "kind": 6,
-                "parent_name": "",
-                "name": "ggb_penalty(arma::mat, arma::imat, double, float &, int, double, float, int)",
-                "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
-                "line": 305,
+                "line": 116,
                 "column": 7
             },
             {
-                "usr": "c:rcpparma.cpp@F@objective#$@N@arma@S@Mat>#d#S0_#d#d#",
+                "usr": "c:@F@Majorizor_EM_grad#$@N@arma@S@Mat>#d#S0_#S0_#f#",
                 "kind": 6,
                 "parent_name": "",
-                "name": "objective(arma::mat, arma::mat, double, double)",
+                "name": "Majorizor_EM_grad(arma::mat, arma::mat, arma::mat, float)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
-                "line": 375,
-                "column": 15
-            },
-            {
-                "usr": "c:rcpparma.cpp@F@g#$@N@arma@S@Mat>#d#S0_#",
-                "kind": 6,
-                "parent_name": "",
-                "name": "g(arma::mat, arma::mat)",
-                "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
-                "line": 379,
-                "column": 14
-            },
-            {
-                "usr": "c:rcpparma.cpp@F@G_x#$@N@arma@S@Mat>#d#S0_#f#",
-                "kind": 6,
-                "parent_name": "",
-                "name": "G_x(arma::mat, arma::mat, float)",
-                "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
-                "line": 383,
-                "column": 18
-            },
-            {
-                "usr": "c:rcpparma.cpp@F@G_t#$@N@arma@S@Mat>#d#S0_#f#",
-                "kind": 6,
-                "parent_name": "",
-                "name": "G_t(arma::mat, arma::mat, float)",
-                "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
-                "line": 387,
-                "column": 18
-            },
-            {
-                "usr": "c:@F@ggb_mm#$@N@arma@S@Mat>#d#S0_#$@N@arma@S@Mat>#I#d#d#d#I#d#I#d#I#",
-                "kind": 6,
-                "parent_name": "",
-                "name": "ggb_mm(arma::mat, arma::mat, arma::imat, double, double, double, int, double, int, double, int)",
-                "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
-                "line": 392,
+                "line": 133,
                 "column": 11
             },
             {
-                "usr": "c:@F@iter_method#$@N@arma@S@Mat>#d#$@N@arma@S@Mat>#I#d#d#d#I#d#&$@N@arma@S@Col>#d#I#d#I#",
+                "usr": "c:@F@Majorizor_linear#$@N@arma@S@Mat>#d#S0_#S0_#",
                 "kind": 6,
                 "parent_name": "",
-                "name": "iter_method(arma::mat, arma::imat, double, double, double, int, double, arma::vec &, int, double, int)",
+                "name": "Majorizor_linear(arma::mat, arma::mat, arma::mat)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
-                "line": 437,
+                "line": 147,
+                "column": 7
+            },
+            {
+                "usr": "c:@F@Majorizor_linear_grad#$@N@arma@S@Mat>#d#S0_#S0_#",
+                "kind": 6,
+                "parent_name": "",
+                "name": "Majorizor_linear_grad(arma::mat, arma::mat, arma::mat)",
+                "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
+                "line": 152,
                 "column": 11
             },
             {
-                "usr": "c:@F@modify_by_ref#&f#",
+                "usr": "c:@S@CPPResult",
+                "kind": 3,
+                "parent_name": "",
+                "name": "CPPResult",
+                "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
+                "line": 175,
+                "column": 8
+            },
+            {
+                "usr": "c:@F@pack_vector#*$@S@CPPResult#",
                 "kind": 6,
                 "parent_name": "",
-                "name": "modify_by_ref(float &)",
+                "name": "pack_vector(CPPResult *)",
                 "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
-                "line": 497,
+                "line": 184,
+                "column": 11
+            },
+            {
+                "usr": "c:@F@prox_implementation#$@N@arma@S@Mat>#d#$@N@arma@S@Mat>#I#d#I#d#I#*$@S@CPPResult#",
+                "kind": 6,
+                "parent_name": "",
+                "name": "prox_implementation(arma::mat, arma::imat, double, int, double, int, CPPResult *)",
+                "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
+                "line": 201,
                 "column": 6
+            },
+            {
+                "usr": "c:@F@ggb_psd_implementation#$@N@arma@S@Mat>#d#$@N@arma@S@Mat>#I#d#f#I#d#I#*$@S@CPPResult#",
+                "kind": 6,
+                "parent_name": "",
+                "name": "ggb_psd_implementation(arma::mat, arma::imat, double, float, int, double, int, CPPResult *)",
+                "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
+                "line": 268,
+                "column": 6
+            },
+            {
+                "usr": "c:@F@ggb_mm_linear_implementation#$@N@arma@S@Mat>#d#S0_#$@N@arma@S@Mat>#I#d#d#d#d#I#d#I#*$@S@CPPResult#",
+                "kind": 6,
+                "parent_name": "",
+                "name": "ggb_mm_linear_implementation(arma::mat, arma::mat, arma::imat, double, double, double, double, int, double, int, CPPResult *)",
+                "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
+                "line": 343,
+                "column": 6
+            },
+            {
+                "usr": "c:@F@ggb_mm_EM_implementation#$@N@arma@S@Mat>#d#S0_#$@N@arma@S@Mat>#I#d#d#d#d#I#d#I#*$@S@CPPResult#",
+                "kind": 6,
+                "parent_name": "",
+                "name": "ggb_mm_EM_implementation(arma::mat, arma::mat, arma::imat, double, double, double, double, int, double, int, CPPResult *)",
+                "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
+                "line": 420,
+                "column": 6
+            },
+            {
+                "usr": "c:@F@c_prox#$@N@arma@S@Mat>#d#$@N@arma@S@Mat>#I#d#I#d#I#",
+                "kind": 6,
+                "parent_name": "",
+                "name": "c_prox(arma::mat, arma::imat, double, int, double, int)",
+                "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
+                "line": 500,
+                "column": 11
+            },
+            {
+                "usr": "c:@F@c_ggb_psd#$@N@arma@S@Mat>#d#$@N@arma@S@Mat>#I#d#f#I#d#I#",
+                "kind": 6,
+                "parent_name": "",
+                "name": "c_ggb_psd(arma::mat, arma::imat, double, float, int, double, int)",
+                "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
+                "line": 507,
+                "column": 11
+            },
+            {
+                "usr": "c:@F@c_ggb_mm_linear#$@N@arma@S@Mat>#d#S0_#$@N@arma@S@Mat>#I#d#d#d#d#I#d#I#",
+                "kind": 6,
+                "parent_name": "",
+                "name": "c_ggb_mm_linear(arma::mat, arma::mat, arma::imat, double, double, double, double, int, double, int)",
+                "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
+                "line": 514,
+                "column": 11
+            },
+            {
+                "usr": "c:@F@c_ggb_mm_EM#$@N@arma@S@Mat>#d#S0_#$@N@arma@S@Mat>#I#d#d#d#d#I#d#I#",
+                "kind": 6,
+                "parent_name": "",
+                "name": "c_ggb_mm_EM(arma::mat, arma::mat, arma::imat, double, double, double, double, int, double, int)",
+                "file": "C:/Users/delwi/Code/CompStratDesign/src/rcpparma.cpp",
+                "line": 521,
+                "column": 11
             }
         ]
     }

@@ -1,47 +1,16 @@
-// -*- mode: C++; c-indent-level: 4; c-basic-offset: 4; indent-tabs-mode: nil; -*-
-
-// include RcppArmadillo.h which pulls Rcpp.h
 #include "RcppArmadillo.h"
 
-//#include "bcd.h"
-
-extern "C" void pathwiseprox_bcd3(double *rr, int *dd, int *M, double *lambda, int *p, double *sumvv, double *obj, float* penalty, int *maxiter, double *tol, int *verbose);
-// via the depends attribute we tell Rcpp to create hooks for
-// RcppArmadillo so that the build process will know what to do
-//
-// [[Rcpp::depends(RcppArmadillo)]]
-double interpolate(double a, double b, double t) {
-    return a + (b-a) * t;
-}
-
-arma::mat interpolate_matrix(arma::mat m1, arma::mat m2, double t) {
-    if (m1.n_rows != m2.n_rows || m1.n_cols != m2.n_cols) return m1;
-    
-    arma::mat res(m1.n_rows, m1.n_cols);
-    
-    for(int i=0; i < m1.n_rows; i++)
-        for(int j=0;j<m1.n_cols;j++)
-            res(i, j) = interpolate(m1(i, j), m2(i, j), t);
-    
-    return res;
-}
+// modified BCD Function from Jacob Bien github: https://github.com/jacobbien/ggb
+extern "C" void pathwiseprox_bcd3(double *rr, int *dd, int *M, double *lambda, int *p, double *sumvv, double *obj, double* penalty, int *maxiter, double *tol, int *verbose, int* out_iter, int* did_converge);
 
 
-// [[Rcpp::export]]
-arma::mat EstimateCov(arma::mat data, double lambda) {
-    arma::mat cov = arma::cov(data);
-    arma::mat res = interpolate_matrix(cov, arma::mat(cov.n_rows, cov.n_cols, arma::fill::zeros), lambda);
-    
-    for(int i=0;i<cov.n_rows;i++) res(i, i) =  cov(i, i);
-    
-    return res;
-}
+// Helper Functions
 
-int min_dist(const arma::imat& dist, const arma::ivec& t_set, int r) // finding minimum distance
-{
+// finding minimum distance
+int min_dist(const arma::imat& dist, const arma::ivec& t_set, int r) {
     int mi = 0, mv = INT_MAX;
     
-    for(int i=0;i<dist.n_cols;i++) 
+    for(int i=0;i<(int)dist.n_cols;i++) 
     {
         if(!t_set(i) && dist(r, i) <= mv)      
         {
@@ -52,9 +21,8 @@ int min_dist(const arma::imat& dist, const arma::ivec& t_set, int r) // finding 
     return mi;
 }
 
-
-arma::imat shortest_path(arma::imat graph) // adjacency matrix 
-{
+// adjacency matrix 
+arma::imat shortest_path(arma::imat graph) {
     int rows = graph.n_rows, cols=rows;
     if (rows != cols) return arma::imat(1, 1);
     
@@ -86,45 +54,47 @@ arma::imat shortest_path(arma::imat graph) // adjacency matrix
     return dist;
 }
 
-
-arma::vec tri(const arma::mat &matrix, char s) {
+// Get lower or upper triangle of matrix in vector form
+arma::vec tri(const arma::mat& matrix, char s) {
     int rows = matrix.n_rows;
-    if (rows != matrix.n_cols || rows < 2) return arma::vec(1);
-    
+    if (rows != (int)matrix.n_cols || rows < 2) return arma::vec(1);
+
     int size = (rows * rows - rows) / 2 + rows % 2;
-    
+
     arma::vec vec(size);
-    
-    for(int i=0,c=0;i<rows-1;i++)
+
+    for(int i=0,c=0;i<rows-1;i++) {
         for(int j=1+i;j<rows;j++,c++) {
             if (s == 'L')
                 vec(c) = matrix(j, i);
             else
                 vec(c) = matrix(i, j);
         }
-    
+    }
     return vec;
 }
 
-arma::ivec tri(const arma::imat &matrix, char s) {
+// Get lower or upper triangle of integer matrix in integer vector form
+arma::ivec tri(const arma::imat& matrix, char s) {
     int rows = matrix.n_rows;
-    if (rows != matrix.n_cols || rows < 2) return arma::ivec(1);
-    
+    if (rows != (int)matrix.n_cols || rows < 2) return arma::ivec(1);
+
     int size = (rows * rows - rows) / 2 + rows % 2;
-    
+
     arma::ivec vec(size);
-    
-    for(int i=0,c=0;i<rows-1;i++)
+
+    for(int i=0,c=0;i<rows-1;i++) {
         for(int j=1+i;j<rows;j++,c++) {
             if (s == 'L')
                 vec(c) = matrix(j, i);
             else
                 vec(c) = matrix(i, j);
         }
-        
-        return vec;
+    }
+    return vec;
 }
 
+// Create symetrical matrix from upper or lower triangle
 arma::mat from_tri(const arma::vec& vec, int rows) {
     arma::mat mat(rows, rows);
 
@@ -136,7 +106,11 @@ arma::mat from_tri(const arma::vec& vec, int rows) {
     return mat;
 }
 
+static inline float max(float a, float b) { return a > b ? a : b; }
 
+
+
+// Majorizor Functions
 
 // [[Rcpp::export]]
 float Majorizor_EM(arma::mat sig_til, arma::mat sig, arma::mat S, float tau) {
@@ -174,7 +148,6 @@ float Majorizor_linear(arma::mat sig_til, arma::mat sig, arma::mat S) {
     return arma::trace(sig_til.i() * sig) + arma::trace(S * sig.i());
 }
 
-
 // [[Rcpp::export]]
 arma::mat Majorizor_linear_grad(arma::mat sig_til, arma::mat sig, arma::mat S) {
     arma::mat sig_inv = sig.i();
@@ -185,150 +158,150 @@ arma::mat Majorizor_linear_grad(arma::mat sig_til, arma::mat sig, arma::mat S) {
     return out;
 }
 
-// [[Rcpp::export]]
-arma::mat prox(arma::mat S, arma::imat G, double lambda, float& penalty, int maxiter=500, double tol=1e-4, int verbose=1) {
+
+// C++ Functions
+
+/* Design:
+ * The C implementation for each function is extracted to a C-only function (marked _implementation) which fills the CPPResult struct
+ * Then a separate function 'arma::vec pack_vector(CPPResult* cppres)' converts this struct into a vector (since R can't handle a C-struct)
+ * In R we convert the vector back into an R class to get the final result
+ * 
+ * The functions that are called by R are implemented at the end of the script and are marked with [[Rcpp::export]]
+ * 
+ */
+
+
+// C++ Struct which stores result data for each algorithm
+struct CPPResult {
+    arma::mat sigma;
+    arma::vec objective;
+    int iterations;
+    double penalty;
+    bool did_converge;
+};
+
+// Converts the C++ struct into a vector by placing each variable from the struct into a vector in order
+arma::vec pack_vector(CPPResult* cppres) {
+    arma::vec result(3 + (int)cppres->sigma.n_elem + cppres->iterations);
+    
+    int i = 0;
+    
+    result(i++) = cppres->did_converge;
+    result(i++) = cppres->iterations;
+    result(i++) = cppres->penalty;
+    
+    for(int x = 0; x < (int)cppres->sigma.n_rows; x++) for (int y = 0; y < (int)cppres->sigma.n_cols; y++) result(i++) = cppres->sigma(x, y);
+    
+    for(int j = 0; j < cppres->iterations; j++) result(i++) = cppres->objective(j);
+    
+    return result;
+}
+
+// Solves the proximal problem (basically a direct call the the C bcd function in bcd.c written by Jacob Bien)
+void prox_implementation(arma::mat S, arma::imat G, double lambda, int maxiter, double tol, int verbose, CPPResult* result) {
     int p = S.n_rows;
     
+    // Finds the shortest paths between every node in the adjacency matrix of the graph (stored as an integer matrix)
     arma::imat D = shortest_path(G);
     
     arma::ivec M(D.n_cols);
     
-    for(int i=0;i<D.n_cols;i++) {
+    // Finds the max depths for each variable
+    for(int i=0;i<(int)D.n_cols;i++) {
         int mi = 0;
-        for(int j=0;j<D.n_rows;j++)
+        for(int j=0;j<(int)D.n_rows;j++)
             if (D(j, i) != INT_MAX && D(j, i) >= D(mi, i))
                 mi = j;
         M(i) = D(i, mi);
     }
     
     int M_max = M.max();
-    for(int i=0;i<D.n_rows;i++)
-        for(int j=0;j<D.n_cols;j++)
+    for(int i=0;i<(int)D.n_rows;i++)
+        for(int j=0;j<(int)D.n_cols;j++)
             if (D(i, j) == INT_MAX)
                 D(i, j) = M_max + 1;
     
+    // Converts S into a lower triangle vector (only form accepted by bcd.c)
     arma::vec ss_vec = tri(S, 'L');
     
+    // Converts D into a lower triangle vector (only form accepted by bcd.c)
     arma::ivec dd_vec = tri(D, 'L');
     
+    // allocates sumvv memory (for use by bcd.c)
     int n_sumvv = p * (p - 1) / 2;
     double *sumvv = new double[n_sumvv];
+
+    // allocates objective memory (for use by bcd.c)    
+    double *obj = new double[maxiter];
+    double penalty = 0.f;
     
-    double obj = 0;
+    // allocates return parameters to be set by bcd.c
+    int out_iter = -1;
+    int did_converge = false;
     
-    pathwiseprox_bcd3(ss_vec.memptr(), dd_vec.memptr(), M.memptr(), &lambda, &p, sumvv, &obj, &penalty, &maxiter, &tol, &verbose);
+    // call to C function in bcd.c, all arguments are passed by pointer
+    pathwiseprox_bcd3(ss_vec.memptr(), dd_vec.memptr(), M.memptr(), &lambda, &p, sumvv, obj, &penalty, &maxiter, &tol, &verbose, &out_iter, &did_converge);
     
+    
+    // Fill CPPResult struct (passed by pointer)
+    
+    result->did_converge = did_converge;
+    result->iterations = out_iter;
+    result->penalty = penalty;
+    
+    result->objective = arma::vec(obj, out_iter);
+    
+    free(obj);
+        
     arma::vec sumvv_vec(n_sumvv);
     for (int i = 0; i < n_sumvv; i++) sumvv_vec(i) = sumvv[i];
     
     free(sumvv);
     
-    arma::mat res = from_tri(sumvv_vec, S.n_rows);
-    for (int i=0;i<res.n_rows;i++) res(i, i) = S(i, i);
+    arma::mat sig = from_tri(sumvv_vec, S.n_rows);
+    for (int i=0;i<(int)sig.n_rows;i++) sig(i, i) = S(i, i);
     
-    return res;
+    result->sigma = sig;
 }
 
-
-static inline float max(float a, float b) { return a > b ? a : b; }
-
-// [[Rcpp::export]]
-arma::mat ggb_psd(arma::mat S, arma::imat G, double lambda, float& penalty, int maxiter, double tol, float delta, int verbose = 1) {
+// Solves the proximal problem w/ psd constriant (this is the same problem which is solved in the main R script ggb.R in Jacob Bien's ggb package)
+void ggb_psd_implementation(arma::mat S, arma::imat G, double lambda, float delta, int maxiter, double tol, int verbose, CPPResult* result) {
 
     arma::mat oldSig;
     arma::mat R, C(S.n_rows, S.n_cols, arma::fill::zeros);
-    
     arma::mat out;
-    
     arma::mat B;
+    double penalty = 0.f;
     
-    for (int i = 0; i < maxiter; i++) { 
+    bool did_converge = false;
+    double *obj = new double[maxiter];
+    int i = 0;
+    
+    for (i = 0; i < maxiter; i++) {
         // update over B: solve Prox on S + C
         R = S + C;
-
-        out = prox(R, G, lambda, penalty, maxiter, tol, verbose);
+        
+        CPPResult res;
+        prox_implementation(R, G, lambda, maxiter, tol, verbose, &res);
+        out = res.sigma;
+        penalty = res.penalty;
         
         //Rcpp::Rcout << "|out|" << arma::norm(out - out.t(), "fro") << "\n";
         
         B = R - out;
         
+        
+        // checks max dif between each element to determine if we should stop iterating
         float max_dif = -1e10; 
         
-        if (oldSig.n_elem > 0)
-            for(int j=0;j<out.n_rows;j++)for(int k=0;k<out.n_cols;k++) max_dif = max(max_dif, abs(out(j,k)-oldSig(j,k)));
+        if ((int)oldSig.n_elem > 0)
+            for(int j=0;j<(int)out.n_rows;j++)for(int k=0;k<(int)out.n_cols;k++) max_dif = max(max_dif, abs(out(j,k)-oldSig(j,k)));
         
         
         if (i > 1 && max_dif < tol) {
             if (verbose > 0) Rcpp::Rcout << "ggb_psd Converged after " << i << " iterations\n";
-                break;
-        }
-        
-        oldSig = out;
-        
-        // update over C: adjust eigenvalues
-        arma::vec eigen_val;
-        arma::mat eigen_vec;
-        
-        
-        //Rcpp::Rcout << "|B|" << arma::norm(B - B.t(), "fro") << "\n";
-        
-        
-        arma::eig_sym(eigen_val, eigen_vec, B - S);
-
-        
-        
-        // am I allowed to ask for real?
-        arma::mat diag_mat(eigen_val.n_elem, eigen_val.n_elem);
-        for(int j = 0; j < eigen_val.n_elem; j++) diag_mat(j, j) = max(eigen_val(j) + delta, 0.f);
-        
-        C = eigen_vec * diag_mat * eigen_vec.t();
-        
-        // keep using same w without recomputing
-        // w <- out$w
-    }
-    
-    
-    Rcpp::Rcout << "Penalty " << penalty << "\n";
-    
-    return S + C - B; // S + C - B
-    // obj[l] <- out$obj + (sum((S - Sig[[l]])^2) - sum((R - Sig[[l]])^2))/2
-}
-
-
-
-
-
-
-
-
-// [[Rcpp::export]]
-float ggb_penalty(arma::mat S, arma::imat G, double lambda, float& penalty, int maxiter, double tol, float delta, int verbose = 1) {
-    
-    arma::mat oldSig;
-    arma::mat R, C(S.n_rows, S.n_cols, arma::fill::zeros);
-    
-    arma::mat out;
-    
-    arma::mat B;
-    
-    for (int i = 0; i < maxiter; i++) { 
-        // update over B: solve Prox on S + C
-        R = S + C;
-        
-        out = prox(R, G, lambda, penalty, maxiter, tol, verbose);
-        
-        //Rcpp::Rcout << "|out|" << arma::norm(out - out.t(), "fro") << "\n";
-        
-        B = R - out;
-        
-        float max_dif = -1e10; 
-        
-        if (oldSig.n_elem > 0)
-            for(int j=0;j<out.n_rows;j++)for(int k=0;k<out.n_cols;k++) max_dif = max(max_dif, abs(out(j,k)-oldSig(j,k)));
-        
-        
-        if (i > 1 && max_dif < tol) {
-            if (verbose > 0) Rcpp::Rcout << "ggb_psd Converged after " << i << " iterations\n";
+            did_converge = true;
+            i--;
             break;
         }
         
@@ -343,163 +316,210 @@ float ggb_penalty(arma::mat S, arma::imat G, double lambda, float& penalty, int 
         
         
         arma::eig_sym(eigen_val, eigen_vec, B - S);
+
         
         
-        
-        // am I allowed to ask for real?
         arma::mat diag_mat(eigen_val.n_elem, eigen_val.n_elem);
-        for(int j = 0; j < eigen_val.n_elem; j++) diag_mat(j, j) = max(eigen_val(j) + delta, 0.f);
+        for(int j = 0; j < (int)eigen_val.n_elem; j++) diag_mat(j, j) = max(eigen_val(j) + delta, 0.f);
         
         C = eigen_vec * diag_mat * eigen_vec.t();
         
-        // keep using same w without recomputing
-        // w <- out$w
+        // Calculate objective for current iterations
+        // obj[l] <- out$obj + (sum((S - Sig[[l]])^2) - sum((R - Sig[[l]])^2))/2
+        // return penalty + pow(arma::accu(S - oldSig), 2) - sum((R - oldSig)^2))/2;
+        // res.objective(res.iterations - 1) + (arma::accu(pow(S - res.sigma, 2)) - arma::accu(pow(R - res.sigma, 2))) / 2;
+        obj[i] = log(arma::det(res.sigma)) + arma::trace(S * res.sigma.i()) + lambda * penalty; 
     }
-    return 0; 
-    // return penalty + pow(arma::accu(S - oldSig), 2) - sum((R - oldSig)^2))/2;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-static double objective(arma::mat S, arma::mat theta, double lambda, double penalty) {
-    return -log(arma::det(theta)) + arma::trace(S * theta) + lambda * penalty;
-}
-
-static float g(arma::mat x, arma::mat S) {
-    return -log(arma::det(x)) + arma::trace(S * x);
-}
-
-static arma::mat G_x(arma::mat x, arma::mat x_p, float t) {
-    return (x - x_p) / t;
-}
-
-static arma::mat G_t(arma::mat E_k_1, arma::mat E_k, float t) {
-    return (E_k_1 - E_k) / t;
-}
-
-// [[Rcpp::export]]
-arma::mat ggb_mm(arma::mat S, arma::mat sig_til, arma::imat G, double t, double tol, double B, int maxiter, double lambda, int prox_maxiter=500, double prox_tol=1e-4, int verbose=1) {
-
-    std::vector<arma::mat> sigma;
-    sigma.push_back(S);
     
-    float penalty;
+    // Fill CPPResult struct (passed by pointer)
+    result->did_converge = did_converge;
+    result->iterations = i;
+    result->penalty = penalty;
+    result->sigma = S + C - B;
+    result->objective = arma::vec(obj, i);
+}
+
+// Solve proximal decent with a linear majorizer function, iterating over the ggb_psd method 
+void ggb_mm_linear_implementation(arma::mat S, arma::mat sig_til, arma::imat G, double lambda, double tau, double t, double B, int maxiter, double tol, int verbose, CPPResult* result) {
     
-    float init_t = t;
+    // initialize variables
+    arma::mat sig_k = S; // diag(nrow(S)) # sigma of current iteration
+    arma::mat sig_k_1 = S; // sigma of last iteration
+    bool did_converge = false;
+    int it = 0;
+    double* obj = new double[maxiter];
+    double penalty = 0.f;
+    
         
-    while(sigma.size() < 2 || arma::norm(sigma.back() - sigma[sigma.size() - 2], "fro") / arma::norm(sigma[sigma.size() - 2]) > tol) {
+    for (it = 0; it < maxiter; it++) {
+        arma::mat grad = Majorizor_linear_grad(sig_til, sig_k, S); // cache gradient
         
+        float mm_sig_k_1 = Majorizor_linear(sig_til, sig_k, S); // cache majorizer
         
-        arma::mat sig_bar = prox(sigma.back() - t * Majorizor_linear_grad(sig_til, sigma.back(), S), G, lambda, penalty, prox_maxiter, prox_tol, verbose);
+        arma::mat new_S = sig_k - t * grad;
         
-        arma::mat sig_k = sigma.back();
+        CPPResult res;
+        ggb_psd_implementation(new_S, G, t * lambda, tau, maxiter, tol, verbose, &res);
+        arma::mat sig_bar = res.sigma;
         
-        t = init_t;
+        penalty = res.penalty;
+        obj[it] = Majorizor_linear(sig_til, sig_bar, S) + lambda * penalty; // (res.objective(res.iterations - 1) - 1/2 * pow(arma::norm(new_S - sig_bar, "fro"), 2)) /  t;
         
-        while(true) {
+        // penalty <- (ggb_out$obj - 1/2 * norm(new_S - sig_bar, 'F') ** 2) / (lambda * t)
+        // objective <- c(objective, calc_obj(penalty, sig_bar))
+        
+        //print(calc_obj(penalty, sig_bar))
+        
+        // ===== BACKTRACK Line Search =============
+        
+        for (int t_it = 0; t_it < 5; t_it++) {
+            
+            arma::mat G_t = (sig_k - sig_bar) / t;
+            
             float mm_sig_bar = Majorizor_linear(sig_til, sig_bar, S);
             
-            float mm_sig_k_1 = Majorizor_linear(sig_til, sig_k, S);
+            float term_2 = -t * arma::trace(grad.t() * G_t);
             
-            float term_2 = -t * arma::trace(Majorizor_linear_grad(sig_til, sig_k, S).t() * G_t(sig_k, sig_bar, t));
+            float term_3 = t/2 * pow(arma::norm(G_t, "fro"), 2);
             
-            float term_3 = t/2 * pow(arma::norm(G_t(sig_k, sig_bar, t), "fro"), 2);
-            
-            if (mm_sig_bar <= mm_sig_k_1 + term_2 + term_3) 
+            if (mm_sig_bar > mm_sig_k_1 + term_2 + term_3) // backtracking condition as specified in paper
             {
-                sig_bar = prox(sig_k - t * Majorizor_linear_grad(sig_til, sig_k, S), G, lambda, penalty, prox_maxiter, prox_tol, verbose);
-                Rcpp::Rcout << "=============================Shrinking t: " << t << "=============================\n";
                 t *= B;
-            } else {
-                break;
+                
+                new_S = sig_k - t * grad;
+                
+                ggb_psd_implementation(new_S, G, t * lambda, tau, maxiter, tol, verbose, &res);
+                sig_bar = res.sigma;        
+                
+                penalty = res.penalty;
+                obj[it] = Majorizor_linear(sig_til, sig_bar, S) + lambda * (res.objective(res.iterations - 1) - 1/2 * pow(arma::norm(new_S - sig_bar, "fro"), 2)) /  t;
             }
+            else break;
         }
         
-        sigma.push_back(sig_bar);
+        // ============ set sig for next iteration ===============
+        sig_k_1 = sig_k;
+        sig_k = sig_bar;
+        
+        
+        if (it > 0 && arma::norm(sig_k - sig_k_1, "fro") / arma::norm(sig_k_1, "fro") < tol) {
+            did_converge = true;
+            break;
+        }
     }
     
-    return sigma.back();
+    // Fill CPPResult struct (passed by pointer)
+    result->did_converge = did_converge;
+    result->iterations = it;
+    result->penalty = penalty;
+    result->sigma = sig_k;
+    result->objective = arma::vec(obj, it);
 }
 
-
-// [[Rcpp::export]]
-arma::mat iter_method(arma::mat S, arma::imat G, double t, double tol, double B, int maxiter, double lambda, arma::vec& objective_vec, int ggb_maxiter=500, double ggb_tol=1e-4, int verbose=1) {
-    float orig_t = t;
+// Solve proximal decent with an EM majorizer function, iterating over the ggb_psd method
+void ggb_mm_EM_implementation(arma::mat S, arma::mat sig_til, arma::imat G, double lambda, double tau, double t, double B, int maxiter, double tol, int verbose, CPPResult* result) {
     
-    arma::mat theta_old = arma::diagmat(S.i());
+    // THIS FUNCTION SAME AS GGB_MM_LINEAR but all calls to majorizer functions are swapped from linear to EM
     
-    float penalty;
+    // initialize variables
+    arma::mat sig_k = S; // diag(nrow(S)) # sigma of current iteration
+    arma::mat sig_k_1 = S; // sigma of last iteration
+    bool did_converge = false;
+    int it = 0;
+    double* obj = new double[maxiter];
+    double penalty = 0.f;
     
-    arma::mat theta = prox(theta_old - t * (-theta_old.i() + S), G, lambda, penalty);
     
-    //double prev_obj = 1000;
-    int i;
-    for (i = 0; i < maxiter && arma::norm(theta - theta_old, "fro") > tol; ++i) {
+    for (it = 0; it < maxiter; it++) {
+        arma::mat grad = Majorizor_EM_grad(sig_til, sig_k, S, tau);
         
-        Rcpp::Rcout << "norm: " << arma::norm(theta - theta_old, "fro") << " > tol: " << tol << "\n";
+        float mm_sig_k_1 = Majorizor_EM(sig_til, sig_k, S, tau);
         
-        t = orig_t;
-        theta_old = theta;
+        arma::mat new_S = sig_k - t * grad;
         
-        // Shrink t
-        // store inverse of theta for repetitive use, only write in terms of old theta
-        arma::mat new_S = theta_old - t * (-theta_old.i() + S);
+        CPPResult res;
+        ggb_psd_implementation(new_S, G, t * lambda, tau, maxiter, tol, verbose, &res);
+        arma::mat sig_bar = res.sigma;
         
-        arma::mat next_theta = prox(new_S, G, lambda * t, penalty, ggb_maxiter, ggb_tol, verbose);
+        penalty = res.penalty;
+        obj[it] = Majorizor_EM(sig_til, sig_bar, S, tau) + lambda * penalty; // (res.objective(res.iterations - 1) - 1/2 * pow(arma::norm(new_S - sig_bar, "fro"), 2)) /  t;
         
+        // penalty <- (ggb_out$obj - 1/2 * norm(new_S - sig_bar, 'F') ** 2) / (lambda * t)
+        // objective <- c(objective, calc_obj(penalty, sig_bar))
         
-        int b_maxiter = maxiter;
-        int b_i = 0;
-        // use theta old
-        while(g(next_theta, S) > g(theta, S) - t * arma::trace((-arma::inv(theta) + S).t() * G_x(theta, next_theta, t)) + t / 2 * pow(arma::norm(G_x(theta, next_theta, t), "fro"), 2) && b_i < b_maxiter) {
-            t *= B;
-            new_S = theta_old - t * (-theta_old.i() + S);
-            next_theta = prox(new_S, G, lambda * t, penalty, ggb_maxiter, ggb_tol, verbose);
-            Rcpp::Rcout << "=============================Shrinking t: " << t << "=============================\n";
-            b_i++;
-        }
+        //print(calc_obj(penalty, sig_bar))
         
-        if (b_i > b_maxiter) {
-            Rcpp::Rcout << "Hit B_Maxiter";
+        // ===== BACKTRACK Line Search =============
+        
+        for (int t_it = 0; t_it < 5; t_it++) {
             
+            arma::mat G_t = (sig_k - sig_bar) / t;
+            
+            float mm_sig_bar = Majorizor_EM(sig_til, sig_bar, S, tau);
+            
+            float term_2 = -t * arma::trace(grad.t() * G_t);
+            
+            float term_3 = t/2 * pow(arma::norm(G_t, "fro"), 2);
+            
+            if (mm_sig_bar > mm_sig_k_1 + term_2 + term_3)
+            {
+                t *= B;
+                
+                new_S = sig_k - t * grad;
+                
+                ggb_psd_implementation(new_S, G, t * lambda, tau, maxiter, tol, verbose, &res);
+                sig_bar = res.sigma;        
+                
+                penalty = res.penalty;
+                obj[it] = Majorizor_EM(sig_til, sig_bar, S, tau) + lambda * (res.objective(res.iterations - 1) - 1/2 * pow(arma::norm(new_S - sig_bar, "fro"), 2)) /  t;
+            }
+            else break;
         }
         
-        theta = next_theta;
+        // ============ set sig for next iteration ===============
+        sig_k_1 = sig_k;
+        sig_k = sig_bar;
         
-        objective_vec[i] = objective(S, theta, lambda, penalty);
         
-        
-        if (i > 0 && objective_vec[i] > objective_vec[i-1]) {
-            Rcpp::Rcout << "Objective not decreasing on " << i << " iteration\n";
+        if (it > 0 && arma::norm(sig_k - sig_k_1, "fro") / arma::norm(sig_k_1, "fro") < tol) {
+            did_converge = true;
+            break;
         }
     }
     
-    //return theta_old - t * (-theta_old.i() + S);
+    result->did_converge = did_converge;
+    result->iterations = it;
+    result->penalty = penalty;
+    result->sigma = sig_k;
+    result->objective = arma::vec(obj, it);
+}
 
-        
-    if (verbose)
-        Rcpp::Rcout << "Iterative Method converged after " << i << " iterations\n";
-    return theta;
+// R Export Functions
+
+// [[Rcpp::export]]
+arma::vec c_prox(arma::mat S, arma::imat G, double lambda, int maxiter, double tol, int verbose) {
+    CPPResult cppres;
+    prox_implementation(S, G, lambda, maxiter, tol, verbose, &cppres); // call to prox implementation to fill cppres, passed by pointer
+    return pack_vector(&cppres); // convert cppres to packed vector for R
 }
 
 // [[Rcpp::export]]
-void modify_by_ref(float& val) {
-    val += 5;
+arma::vec c_ggb_psd(arma::mat S, arma::imat G, double lambda, float delta, int maxiter, double tol, int verbose) {
+    CPPResult cppres;
+    ggb_psd_implementation(S, G, lambda, delta, maxiter, tol, verbose, &cppres); // call to ggb psd implementation to fill cppres, passed by pointer
+    return pack_vector(&cppres); // convert cppres to packed vector for R
 }
 
+// [[Rcpp::export]]
+arma::vec c_ggb_mm_linear(arma::mat S, arma::mat sig_til, arma::imat G, double lambda, double tau, double t, double B, int maxiter, double tol, int verbose) {
+    CPPResult cppres;
+    ggb_mm_linear_implementation(S, sig_til, G, lambda, tau, t, B, maxiter, tol, verbose, &cppres); // call to ggb mm linear implementation to fill cppres, passed by pointer
+    return pack_vector(&cppres); // convert cppres to packed vector for R
+}
 
-
-
-
-
+// [[Rcpp::export]]
+arma::vec c_ggb_mm_EM(arma::mat S, arma::mat sig_til, arma::imat G, double lambda, double tau, double t, double B, int maxiter, double tol, int verbose) {
+    CPPResult cppres;
+    ggb_mm_EM_implementation(S, sig_til, G, lambda, tau, t, B, maxiter, tol, verbose, &cppres); // call to ggb mm EM implementation to fill cppres, passed by pointer
+    return pack_vector(&cppres); // convert cppres to packed vector for R
+}
